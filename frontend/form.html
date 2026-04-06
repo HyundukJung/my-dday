@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D-day 추가 - My D-day</title>
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 id="page-title">D-day 추가</h1>
+      <a href="index.html" class="btn btn-outline btn-sm">취소</a>
+    </div>
+
+    <div class="card">
+      <form id="dday-form">
+        <div class="input-group">
+          <label for="title">제목</label>
+          <input type="text" id="title" placeholder="예: 민지 생일" maxlength="100" required>
+        </div>
+
+        <div class="input-group">
+          <label for="category">카테고리</label>
+          <select id="category" required>
+            <option value="birthday">생일</option>
+            <option value="anniversary">기념일</option>
+            <option value="couple">커플</option>
+            <option value="exam">시험</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="target_date">날짜</label>
+          <input type="date" id="target_date" required>
+        </div>
+
+        <p id="error-msg" class="error-msg"></p>
+
+        <button type="submit" class="btn btn-primary mt-12" id="submit-btn">저장</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/form.js"></script>
+</body>
+</html>

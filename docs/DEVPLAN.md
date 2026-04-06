@@ -62,14 +62,14 @@ my-dday/
 
 ---
 
-## Phase 0 — 프로젝트 초기화 [ ]
+## Phase 0 — 프로젝트 초기화 [✅]
 
 ### 작업
-- [ ] `backend/`, `frontend/`, `docs/` 폴더 생성
-- [ ] `backend/package.json` 초기화 (`npm init -y`)
-- [ ] `.gitignore` 작성 (node_modules, .env, .DS_Store)
-- [ ] `backend/.env.example` 작성
-- [ ] git 초기화 + 첫 커밋
+- [x] `backend/`, `frontend/`, `docs/` 폴더 생성
+- [x] `backend/package.json` 초기화 (`npm init -y`)
+- [x] `.gitignore` 작성 (node_modules, .env, .DS_Store)
+- [x] `backend/.env.example` 작성
+- [x] git 초기화 + 첫 커밋
 
 ### 설치할 패키지 (backend)
 ```bash
@@ -105,20 +105,20 @@ FRONTEND_URL=http://localhost:5500
 ```
 
 ### 검증
-- [ ] `node -e "console.log('ok')"` 정상 실행
-- [ ] 폴더 구조 생성 확인
-- [ ] `.gitignore`에 `.env` 포함 확인
+- [x] `node -e "console.log('ok')"` 정상 실행
+- [x] 폴더 구조 생성 확인
+- [x] `.gitignore`에 `.env` 포함 확인
 
 ---
 
-## Phase 1 — 백엔드 서버 + DB 연결 [ ]
+## Phase 1 — 백엔드 서버 + DB 연결 [✅]
 
 ### 작업
-- [ ] `backend/src/db.js` — PostgreSQL 연결 풀 설정
-- [ ] `backend/src/app.js` — Express 앱 + 미들웨어 등록
-- [ ] `backend/src/server.js` — 포트 리슨
-- [ ] `backend/src/migrations/001_init.sql` — 테이블 생성
-- [ ] DB 마이그레이션 실행 (psql 또는 Node 스크립트)
+- [x] `backend/src/db.js` — PostgreSQL 연결 풀 설정
+- [x] `backend/src/app.js` — Express 앱 + 미들웨어 등록
+- [x] `backend/src/server.js` — 포트 리슨
+- [x] `backend/src/migrations/001_init.sql` — 테이블 생성
+- [x] DB 마이그레이션 실행 (psql 또는 Node 스크립트)
 
 ### DB 스키마 상세
 ```sql
@@ -168,19 +168,19 @@ router 등록
 ```
 
 ### 검증
-- [ ] `npm run dev` 실행 시 `Server running on port 3000` 출력
-- [ ] `curl http://localhost:3000/health` → `{ "status": "ok" }` 응답
-- [ ] DB 연결 성공 로그 확인 (`db.js`에서 `pool.connect()` 테스트)
+- [x] `npm run dev` 실행 시 `Server running on port 3000` 출력
+- [x] `curl http://localhost:3000/health` → `{ "status": "ok" }` 응답
+- [x] DB 연결 성공 로그 확인 (`db.js`에서 `pool.connect()` 테스트)
 
 ---
 
-## Phase 2 — 인증 API (회원가입 / 로그인) [ ]
+## Phase 2 — 인증 API (회원가입 / 로그인) [✅]
 
 ### 작업
-- [ ] `backend/src/middleware/auth.js` — JWT 검증 미들웨어
-- [ ] `backend/src/middleware/validate.js` — 에러 응답 헬퍼
-- [ ] `backend/src/routes/auth.js` — 회원가입 + 로그인 라우터
-- [ ] `app.js`에 `/api/auth` 라우터 등록
+- [x] `backend/src/middleware/auth.js` — JWT 검증 미들웨어
+- [x] `backend/src/middleware/validate.js` — 에러 응답 헬퍼
+- [x] `backend/src/routes/auth.js` — 회원가입 + 로그인 라우터
+- [x] `app.js`에 `/api/auth` 라우터 등록
 
 ### API 스펙
 
@@ -231,12 +231,12 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ---
 
-## Phase 3 — D-day CRUD API [ ]
+## Phase 3 — D-day CRUD API [✅]
 
 ### 작업
-- [ ] `backend/src/routes/ddays.js` — CRUD 라우터
-- [ ] 모든 라우트에 `auth` 미들웨어 적용 (JWT 필수)
-- [ ] `app.js`에 `/api/ddays` 라우터 등록
+- [x] `backend/src/routes/ddays.js` — CRUD 라우터
+- [x] 모든 라우트에 `auth` 미들웨어 적용 (JWT 필수)
+- [x] `app.js`에 `/api/ddays` 라우터 등록
 
 ### API 스펙
 
@@ -303,12 +303,12 @@ curl http://localhost:3000/api/ddays
 
 ---
 
-## Phase 4 — 공유 API [ ]
+## Phase 4 — 공유 API [✅]
 
 ### 작업
-- [ ] `backend/src/routes/share.js` — 공유 라우터
-- [ ] `ddays.js` 라우트에 공유 토큰 생성 엔드포인트 추가
-- [ ] `app.js`에 `/api/share` 라우터 등록
+- [x] `backend/src/routes/share.js` — 공유 라우터
+- [x] `ddays.js` 라우트에 공유 토큰 생성 엔드포인트 추가
+- [x] `app.js`에 `/api/share` 라우터 등록
 
 ### API 스펙
 
@@ -357,12 +357,12 @@ curl http://localhost:3000/api/share/abc123xyz
 
 ---
 
-## Phase 5 — 프론트엔드 기반 설정 [ ]
+## Phase 5 — 프론트엔드 기반 설정 [✅]
 
 ### 작업
-- [ ] `frontend/css/reset.css` — 브라우저 기본 초기화
-- [ ] `frontend/css/main.css` — CSS 변수 + 공통 스타일
-- [ ] `frontend/js/api.js` — fetch 래퍼 유틸리티
+- [x] `frontend/css/reset.css` — 브라우저 기본 초기화
+- [x] `frontend/css/main.css` — CSS 변수 + 공통 스타일
+- [x] `frontend/js/api.js` — fetch 래퍼 유틸리티
 
 ### CSS 변수 정의 (main.css)
 ```css
@@ -406,12 +406,12 @@ export const api = {
 
 ---
 
-## Phase 6 — 인증 UI (로그인 / 회원가입) [ ]
+## Phase 6 — 인증 UI (로그인 / 회원가입) [✅]
 
 ### 작업
-- [ ] `frontend/login.html`
-- [ ] `frontend/signup.html`
-- [ ] `frontend/js/auth.js`
+- [x] `frontend/login.html`
+- [x] `frontend/signup.html`
+- [x] `frontend/js/auth.js`
 
 ### 화면 흐름
 ```
@@ -443,13 +443,13 @@ export const api = {
 
 ---
 
-## Phase 7 — D-day 목록 + CRUD UI [ ]
+## Phase 7 — D-day 목록 + CRUD UI [✅]
 
 ### 작업
-- [ ] `frontend/index.html` — 메인 목록 화면
-- [ ] `frontend/form.html` — 추가/수정 폼
-- [ ] `frontend/js/ddays.js`
-- [ ] `frontend/js/form.js`
+- [x] `frontend/index.html` — 메인 목록 화면
+- [x] `frontend/form.html` — 추가/수정 폼
+- [x] `frontend/js/ddays.js`
+- [x] `frontend/js/form.js`
 
 ### 목록 화면 구성
 ```
@@ -489,12 +489,12 @@ export const api = {
 
 ---
 
-## Phase 8 — 공유 기능 UI [ ]
+## Phase 8 — 공유 기능 UI [✅]
 
 ### 작업
-- [ ] `frontend/share.html` — 공유 수신자 페이지
-- [ ] `frontend/js/share.js`
-- [ ] `frontend/css/themes.css` — 4가지 테마
+- [x] `frontend/share.html` — 공유 수신자 페이지
+- [x] `frontend/js/share.js`
+- [x] `frontend/css/themes.css` — 4가지 테마
 
 ### 공유 링크 생성 흐름 (index.html 내)
 ```
@@ -597,14 +597,14 @@ CREATE TABLE push_subscriptions (
 
 | Phase | 내용 | 상태 |
 |-------|------|------|
-| 0 | 프로젝트 초기화 | ⬜ 대기 |
-| 1 | 백엔드 서버 + DB | ⬜ 대기 |
-| 2 | 인증 API | ⬜ 대기 |
-| 3 | D-day CRUD API | ⬜ 대기 |
-| 4 | 공유 API | ⬜ 대기 |
-| 5 | 프론트 기반 설정 | ⬜ 대기 |
-| 6 | 인증 UI | ⬜ 대기 |
-| 7 | D-day 목록 + CRUD UI | ⬜ 대기 |
-| 8 | 공유 기능 UI | ⬜ 대기 |
+| 0 | 프로젝트 초기화 | ✅ 완료 |
+| 1 | 백엔드 서버 + DB | ✅ 완료 |
+| 2 | 인증 API | ✅ 완료 |
+| 3 | D-day CRUD API | ✅ 완료 |
+| 4 | 공유 API | ✅ 완료 |
+| 5 | 프론트 기반 설정 | ✅ 완료 |
+| 6 | 인증 UI | ✅ 완료 |
+| 7 | D-day 목록 + CRUD UI | ✅ 완료 |
+| 8 | 공유 기능 UI | ✅ 완료 |
 | 9 | 배포 | ⬜ 대기 |
 | 10 | v2 푸시 알림 | ⬜ 선택 |

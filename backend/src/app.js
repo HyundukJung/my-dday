@@ -1,0 +1,59 @@
+require('dotenv').config();
+
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const pool = require('./db');
+
+const app = express();
+
+// --- 미들웨어 등록 순서 ---
+// 1. 보안 헤더
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
+
+// 2. CORS 허용
+app.use(cors({
+  origin: [
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean),
+  credentials: true,
+}));
+
+// 3. JSON 파싱
+app.use(express.json());
+
+// 4. 요청 제한 (15분당 100회)
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+}));
+
+// --- 라우트 ---
+// Health check
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'ok' });
+  } catch (err) {
+    res.status(500).json({ error: 'DB 연결 실패' });
+  }
+});
+
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/ddays', require('./routes/ddays'));
+app.use('/api/share', require('./routes/share'));
+
+// --- 에러 핸들러 ---
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: '서버 내부 오류가 발생했습니다.' });
+});
+
+module.exports = app;

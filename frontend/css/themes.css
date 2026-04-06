@@ -1,0 +1,92 @@
+/* 공유 페이지 공통 */
+.share-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.share-card {
+  text-align: center;
+  padding: 48px 32px;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.share-card .share-emoji {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.share-card .share-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.share-card .share-count {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.share-card .share-date {
+  font-size: 1rem;
+  margin-bottom: 24px;
+}
+
+.share-card .share-message {
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+/* --- 생일 테마 --- */
+.theme-birthday {
+  background: linear-gradient(135deg, #FFECD2, #FCB69F);
+  color: #5D4037;
+}
+.theme-birthday .share-count {
+  color: #E65100;
+}
+
+/* --- 기념일 테마 --- */
+.theme-anniversary {
+  background: linear-gradient(135deg, #FFE6E6, #FF9A9E);
+  color: #880E4F;
+}
+.theme-anniversary .share-count {
+  color: #C62828;
+}
+
+/* --- 커플 테마 --- */
+.theme-couple {
+  background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
+  color: #4A148C;
+}
+.theme-couple .share-count {
+  color: #6A1B9A;
+}
+
+/* --- 시험 테마 --- */
+.theme-exam {
+  background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+  color: #1A237E;
+}
+.theme-exam .share-count {
+  color: #0D47A1;
+}
+
+/* 에러 상태 */
+.share-error {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--color-text-muted);
+}
+.share-error h2 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
