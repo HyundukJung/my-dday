@@ -297,3 +297,45 @@ body {
   color: var(--color-text);
   font-weight: 600;
 }
+
+/* 메모 */
+.dday-memo {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 마일스톤 GCal 버튼 */
+.milestone-gcal-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 4px;
+  margin-left: 4px;
+}
+.milestone-gcal-btn:hover {
+  opacity: 0.7;
+}
+
+/* 메모 textarea */
+.input-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  background: var(--color-surface);
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+.input-group textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}

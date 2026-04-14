@@ -114,6 +114,7 @@ CREATE TABLE ddays (
   is_public   BOOLEAN DEFAULT FALSE,
   share_token VARCHAR(21) UNIQUE,
   share_theme VARCHAR(50),
+  memo        TEXT,                         -- Phase 14 (nullable, 앱 레벨 1000자 제한)
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -130,6 +131,17 @@ CREATE TABLE milestones (
 );
 CREATE INDEX idx_milestones_dday_id ON milestones(dday_id);
 CREATE INDEX idx_milestones_target_date ON milestones(target_date);
+
+-- password_resets (Phase 14 신규)
+CREATE TABLE password_resets (
+  token       VARCHAR(64) PRIMARY KEY,      -- crypto.randomBytes(32).toString('hex')
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at  TIMESTAMPTZ NOT NULL,         -- 발급 후 30분
+  used        BOOLEAN DEFAULT FALSE,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_password_resets_user_id ON password_resets(user_id);
+CREATE INDEX idx_password_resets_expires_at ON password_resets(expires_at);
 ```
 
 ---
@@ -147,6 +159,9 @@ CREATE INDEX idx_milestones_target_date ON milestones(target_date);
 |--------|------|------|
 | POST | `/api/auth/signup` | 회원가입 (email, password 최소 8자) |
 | POST | `/api/auth/login`  | 로그인 → JWT 반환 (만료: 7d) |
+| POST | `/api/auth/forgot-password` | 비밀번호 재설정 토큰 발급 + 메일 전송 (rate limit: 1시간/5회) |
+| POST | `/api/auth/reset-password`  | `{ token, password }` — 토큰 검증 후 해시 갱신 |
+| PUT  | `/api/auth/password` | 로그인 상태에서 `{ currentPassword, newPassword }` |
 
 ### D-day (인증 필수, rate limit: 15분/300회)
 | Method | Path | 설명 |
@@ -278,6 +293,12 @@ POST/PUT/DELETE: 캐시 미사용
 | `JWT_EXPIRES_IN` | `7d` |
 | `NODE_ENV` | `production` |
 | `FRONTEND_URL` | `https://my-dday.vercel.app` |
+| `SMTP_HOST` | (선택) 예: `smtp.gmail.com` — 미설정 시 비밀번호 재설정 메일은 콘솔 로그로만 출력 |
+| `SMTP_PORT` | (선택) 기본 `587` |
+| `SMTP_SECURE` | (선택) `false` |
+| `SMTP_USER` | (선택) 발신 계정 |
+| `SMTP_PASS` | (선택) Gmail 사용 시 "앱 비밀번호" (2FA 필요) |
+| `SMTP_FROM` | (선택) 표시 이름 포함 발신자 |
 
 ### Vercel (프론트)
 - Root Directory: `frontend`
@@ -294,7 +315,7 @@ POST/PUT/DELETE: 캐시 미사용
 
 ```
 Phase 10   Web Push 알림 (Service Worker + VAPID + Railway cron)
-Phase 11-C Google OAuth + Calendar API 연동
-Phase 14   자동 테스트 (Jest + supertest) + GitHub Actions CI
-Phase 15   HttpOnly Cookie 기반 세션 (localStorage → 쿠키 전환)
+Phase 11-C Google OAuth + Calendar API 자동 동기화 (현재는 링크 방식 구현 — Phase 14-D)
+Phase 15   자동 테스트 (Jest + supertest) + GitHub Actions CI
+Phase 16   HttpOnly Cookie 기반 세션 (localStorage → 쿠키 전환)
 ```

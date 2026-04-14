@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>내 계정 - My D-day</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#5B6EE1">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>내 계정</h1>
+      <a href="index.html" class="btn btn-outline btn-sm">← 목록</a>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.1rem;margin-bottom:16px;">비밀번호 변경</h2>
+      <form id="password-form">
+        <div class="input-group">
+          <label for="current-password">현재 비밀번호</label>
+          <input type="password" id="current-password" required>
+        </div>
+
+        <div class="input-group">
+          <label for="new-password">새 비밀번호</label>
+          <input type="password" id="new-password" placeholder="8자 이상" minlength="8" required>
+        </div>
+
+        <div class="input-group">
+          <label for="new-password-confirm">새 비밀번호 확인</label>
+          <input type="password" id="new-password-confirm" minlength="8" required>
+        </div>
+
+        <p id="error-msg" class="error-msg"></p>
+        <p id="success-msg" class="text-center mt-12" style="color:var(--color-success);display:none;font-size:0.9rem;"></p>
+
+        <button type="submit" class="btn btn-primary mt-12" id="submit-btn">변경</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    requireAuth();
+
+    const form = document.getElementById('password-form');
+    const errorMsg = document.getElementById('error-msg');
+    const successMsg = document.getElementById('success-msg');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('show');
+      successMsg.style.display = 'none';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.remove('show');
+      successMsg.style.display = 'none';
+
+      const current = document.getElementById('current-password').value;
+      const next = document.getElementById('new-password').value;
+      const confirm = document.getElementById('new-password-confirm').value;
+
+      if (next.length < 8) return showError('새 비밀번호는 최소 8자 이상이어야 합니다.');
+      if (next !== confirm) return showError('새 비밀번호가 일치하지 않습니다.');
+      if (current === next) return showError('새 비밀번호는 기존과 달라야 합니다.');
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '변경 중...';
+
+      try {
+        const res = await api.auth.changePassword(current, next);
+        successMsg.textContent = res.message || '비밀번호가 변경되었습니다.';
+        successMsg.style.display = 'block';
+        form.reset();
+      } catch (err) {
+        showError(err.error || '비밀번호 변경에 실패했습니다.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '변경';
+      }
+    });
+  </script>
+</body>
+</html>

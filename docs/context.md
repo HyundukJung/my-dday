@@ -10,7 +10,7 @@
   - 프론트: https://my-dday.vercel.app
   - 백엔드: https://my-dday-production.up.railway.app
 - iPhone/Android에 **홈 화면 설치 가능 (PWA)**
-- 총 12개 커밋, Phase 0~13 완료
+- Phase 0~14 완료 (비밀번호 찾기/변경, 메모, Google Calendar 링크 포함)
 
 ---
 
@@ -33,10 +33,13 @@
 6. **마일스톤 모드** — 시작일 + 100/200/300/365/500/1000일 자동 계산
    - 프리셋 체크박스 + 커스텀 일수 입력 지원
 7. **PWA** — 홈 화면 설치, 전체화면 모드, 오프라인 캐시
+8. **비밀번호 찾기/변경** — 이메일 재설정 링크(30분 유효) + 로그인 후 변경
+9. **카드 메모** — 각 D-day에 1000자 이내 메모
+10. **Google Calendar 추가** — OAuth 없이 `calendar.google.com/render` 링크로 all-day 이벤트 생성
 
 ### v2 예정
 - Web Push 알림 (D-day 당일 + 마일스톤 도달일)
-- Google Calendar 자동 등록
+- Google Calendar OAuth 자동 동기화
 - 테마 커스터마이징 확장
 
 ---
@@ -65,10 +68,13 @@ users        id, email, password(bcrypt), created_at
 ddays        id, user_id, title, category,
              target_date (fixed 모드), start_date (milestone 모드),
              dday_type ('fixed'|'milestone'),
-             is_public, share_token, share_theme, created_at
+             is_public, share_token, share_theme,
+             memo (Phase 14), created_at
 
 milestones   id, dday_id, days, target_date,
              notified, gcal_event_id (v2용), created_at
+
+password_resets  token(PK), user_id, expires_at, used, created_at
 ```
 
 ---
@@ -79,6 +85,9 @@ milestones   id, dday_id, days, target_date,
 # 인증 (rate limit 15분/10회)
 POST  /api/auth/signup
 POST  /api/auth/login
+POST  /api/auth/forgot-password    # 1시간/5회
+POST  /api/auth/reset-password     # 토큰으로 재설정
+PUT   /api/auth/password           # 인증 필수, 비밀번호 변경
 
 # D-day (인증 필수)
 GET    /api/ddays
@@ -126,6 +135,7 @@ GET    /health
 | 11-B | 마일스톤 UI (토글, 프리셋, 카드 표시) |
 | 12 | PWA (manifest, SW, 아이콘) |
 | 13 | 품질 개선 (보안, 타임존, 검증 버그) |
+| 14 | 비밀번호 찾기/변경, 카드 메모, Google Calendar 추가 |
 
 ---
 

@@ -88,7 +88,10 @@ function renderDdays() {
         const isPast = m.days <= elapsed;
         const md = parseDbDate(m.target_date);
         const ds = md.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-        return `<li class="${isPast ? 'passed' : 'upcoming'}"><span>${m.days}일</span><span>${ds}</span></li>`;
+        const gcalBtn = !isPast
+          ? `<button class="milestone-gcal-btn gcal-btn" data-title="${escapeHtml(d.title)} ${m.days}일" data-date="${m.target_date}" data-memo="${escapeHtml(d.memo || '')}" title="Google 캘린더에 추가">📅</button>`
+          : '';
+        return `<li class="${isPast ? 'passed' : 'upcoming'}"><span>${m.days}일</span><span>${ds} ${gcalBtn}</span></li>`;
       }).join('');
 
       milestoneHtml = `
@@ -116,6 +119,30 @@ function renderDdays() {
       dateStr = target.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
     }
 
+    const memoHtml = d.memo
+      ? `<div class="dday-memo">${escapeHtml(d.memo).replace(/\n/g, '<br>')}</div>`
+      : '';
+
+    // 카드 메인 GCal 대상 (fixed는 target_date, milestone은 다음 마일스톤)
+    let mainGcalDate = null;
+    let mainGcalTitle = d.title;
+    if (isMilestone) {
+      const ms = (d.milestones || []).slice().sort((a, b) => a.days - b.days);
+      const today2 = new Date(); today2.setHours(0, 0, 0, 0);
+      const start2 = parseDbDate(d.start_date);
+      const elapsed2 = Math.round((today2 - start2) / 86400000);
+      const next = ms.find(m => m.days > elapsed2);
+      if (next) {
+        mainGcalDate = next.target_date;
+        mainGcalTitle = `${d.title} ${next.days}일`;
+      }
+    } else {
+      mainGcalDate = d.target_date;
+    }
+    const gcalMainBtn = mainGcalDate
+      ? `<button class="btn btn-outline btn-sm gcal-btn" data-title="${escapeHtml(mainGcalTitle)}" data-date="${mainGcalDate}" data-memo="${escapeHtml(d.memo || '')}">📅 캘린더</button>`
+      : '';
+
     return `
       <div class="dday-card">
         <div class="dday-card-header">
@@ -124,9 +151,11 @@ function renderDdays() {
         </div>
         <div class="dday-count ${countClass}">${countText === 'D-DAY' ? '&#127881; ' : ''}${countText}</div>
         <div class="dday-date">${dateStr}</div>
+        ${memoHtml}
         ${milestoneHtml}
         <div class="dday-actions">
           <a href="form.html?id=${d.id}" class="btn btn-outline btn-sm">수정</a>
+          ${gcalMainBtn}
           <button class="btn btn-outline btn-sm" onclick="openShareModal(${d.id})">공유</button>
           <button class="btn btn-outline btn-sm" onclick="deleteDday(${d.id})" style="color:var(--color-danger);">삭제</button>
         </div>
@@ -134,6 +163,12 @@ function renderDdays() {
     `;
   }).join('');
 }
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.gcal-btn');
+  if (!btn) return;
+  openGcal(btn.dataset.title, btn.dataset.date, btn.dataset.memo);
+});
 
 function toggleMilestones(el) {
   const list = el.nextElementSibling;
@@ -150,6 +185,37 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// YYYY-MM-DD → YYYYMMDD
+function toGcalDate(dateStr) {
+  return String(dateStr).slice(0, 10).replace(/-/g, '');
+}
+
+// Date(로컬) → YYYYMMDD
+function dateToGcal(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}${m}${day}`;
+}
+
+// Google Calendar 이벤트 생성 URL (all-day, OAuth 불필요)
+function gcalUrl({ title, dateStr, details }) {
+  const start = parseDbDate(dateStr);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1); // all-day end는 exclusive
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    dates: `${dateToGcal(start)}/${dateToGcal(end)}`,
+  });
+  if (details) params.set('details', details);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function openGcal(title, dateStr, details) {
+  window.open(gcalUrl({ title, dateStr, details }), '_blank', 'noopener');
 }
 
 // --- 삭제 ---

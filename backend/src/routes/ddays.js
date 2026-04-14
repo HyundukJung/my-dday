@@ -43,6 +43,7 @@ const ddayValidation = [
   body('target_date').optional({ nullable: true }).isDate().withMessage('올바른 날짜 형식이 아닙니다. (YYYY-MM-DD)'),
   body('start_date').optional({ nullable: true }).isDate().withMessage('올바른 시작일 형식이 아닙니다. (YYYY-MM-DD)'),
   body('milestone_days').optional().isArray().withMessage('milestone_days는 배열이어야 합니다.'),
+  body('memo').optional({ nullable: true }).isLength({ max: 1000 }).withMessage('메모는 1000자 이하여야 합니다.'),
 ];
 
 // 타입별 필수 필드 검증 (POST/PUT 공통)
@@ -96,7 +97,7 @@ router.get('/', async (req, res) => {
 router.post('/', ddayValidation, validate, async (req, res) => {
   const client = await pool.connect();
   try {
-    const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days } = req.body;
+    const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days, memo } = req.body;
 
     const typeError = validateTypeFields(req.body);
     if (typeError) return res.status(400).json({ error: typeError });
@@ -104,8 +105,8 @@ router.post('/', ddayValidation, validate, async (req, res) => {
     await client.query('BEGIN');
 
     const ddayResult = await client.query(
-      `INSERT INTO ddays (user_id, title, category, target_date, start_date, dday_type)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      `INSERT INTO ddays (user_id, title, category, target_date, start_date, dday_type, memo)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [
         req.user.userId,
         title,
@@ -113,6 +114,7 @@ router.post('/', ddayValidation, validate, async (req, res) => {
         dday_type === 'milestone' ? null : target_date,
         dday_type === 'milestone' ? start_date : null,
         dday_type,
+        memo || null,
       ]
     );
     const dday = ddayResult.rows[0];
@@ -142,7 +144,7 @@ router.post('/', ddayValidation, validate, async (req, res) => {
 router.put('/:id', ddayValidation, validate, async (req, res) => {
   const client = await pool.connect();
   try {
-    const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days } = req.body;
+    const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days, memo } = req.body;
 
     const typeError = validateTypeFields(req.body);
     if (typeError) return res.status(400).json({ error: typeError });
@@ -151,14 +153,15 @@ router.put('/:id', ddayValidation, validate, async (req, res) => {
 
     const result = await client.query(
       `UPDATE ddays
-       SET title = $1, category = $2, target_date = $3, start_date = $4, dday_type = $5
-       WHERE id = $6 AND user_id = $7 RETURNING *`,
+       SET title = $1, category = $2, target_date = $3, start_date = $4, dday_type = $5, memo = $6
+       WHERE id = $7 AND user_id = $8 RETURNING *`,
       [
         title,
         category,
         dday_type === 'milestone' ? null : target_date,
         dday_type === 'milestone' ? start_date : null,
         dday_type,
+        memo || null,
         req.params.id,
         req.user.userId,
       ]

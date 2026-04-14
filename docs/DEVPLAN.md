@@ -613,3 +613,52 @@ CREATE TABLE push_subscriptions (
 | 11-C | Google Calendar 연동 | ⬜ 선택 |
 | 12 | PWA (홈 화면 설치, SW 오프라인) | ✅ 완료 |
 | 13 | 품질 개선 (보안/타임존/검증) | ✅ 완료 |
+| 14 | 계정(비밀번호) + 메모 + GCal | ✅ 완료 |
+
+---
+
+## Phase 14 — 계정 관리 + 메모 + Google Calendar [🟡]
+
+### 목표
+사용자가 비밀번호를 잊었을 때 복구할 수 있고, 로그인 후에도 비밀번호를 변경할 수 있으며, 각 D-day 카드에 메모를 남기고 Google 캘린더에 간편 등록할 수 있도록 한다.
+
+### 14-A 비밀번호 찾기 (이메일 재설정)
+- **DB:** `password_resets(token PK, user_id FK, expires_at, used)` 신설
+- **Backend:**
+  - `POST /api/auth/forgot-password { email }` — 토큰 발급 + 이메일 전송 (또는 콘솔 로그)
+  - `POST /api/auth/reset-password { token, password }` — 토큰 검증 후 해시 갱신
+- **메일 전송:** `nodemailer` + SMTP 환경변수. 미설정 시 서버 로그에 링크 출력 (개발/임시 운영용 fallback)
+- **Frontend:** `forgot-password.html`, `reset-password.html?token=xxx`
+
+### 14-B 로그인 후 비밀번호 변경
+- **Backend:** `PUT /api/auth/password { currentPassword, newPassword }` (인증 필수)
+- **Frontend:** `account.html` (현재 비밀번호 + 새 비밀번호 + 확인)
+
+### 14-C 카드 메모
+- **DB:** `ALTER TABLE ddays ADD COLUMN memo TEXT` (nullable, 1000자 제한은 앱 레벨)
+- **Backend:** POST/PUT에 `memo` 필드 지원
+- **Frontend:** form.html에 textarea 추가, index.html 카드에 메모 표시
+
+### 14-D Google Calendar 링크
+- OAuth 없이 `https://calendar.google.com/calendar/render?action=TEMPLATE&text=...&dates=YYYYMMDD/YYYYMMDD&details=...`
+- 카드에 "📅 캘린더에 추가" 버튼 → 새 탭 이동
+- 마일스톤은 각 마일스톤별로 추가 가능 (전체 펼치기에서 버튼 노출)
+
+### 환경변수 추가
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=example@gmail.com
+SMTP_PASS=app_password_here
+SMTP_FROM="My D-day <no-reply@mydday.app>"
+```
+모두 미설정 시 → 콘솔 로그 fallback.
+
+### 검증
+- [ ] 존재하지 않는 이메일로 비밀번호 찾기 요청 → 보안상 동일한 성공 응답 반환
+- [ ] 발급된 토큰으로 재설정 성공 → 로그인 가능
+- [ ] 만료된/사용된 토큰 → 400
+- [ ] 로그인 후 비밀번호 변경 → 새 비밀번호로 로그인 가능
+- [ ] D-day 추가 시 메모 입력 → 카드에 표시
+- [ ] GCal 버튼 클릭 → 이벤트 생성 페이지로 이동, 제목/날짜/메모 채워짐

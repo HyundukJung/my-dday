@@ -53,6 +53,7 @@ async function loadDday() {
     }
     document.getElementById('title').value = dday.title;
     document.getElementById('category').value = dday.category;
+    document.getElementById('memo').value = dday.memo || '';
 
     // 유형 설정
     const type = dday.dday_type || 'fixed';
@@ -103,7 +104,10 @@ form.addEventListener('submit', async (e) => {
 
   if (!title) return showError('제목을 입력해주세요.');
 
-  const payload = { title, category, dday_type };
+  const memo = document.getElementById('memo').value.trim();
+  if (memo.length > 1000) return showError('메모는 1000자 이하여야 합니다.');
+
+  const payload = { title, category, dday_type, memo: memo || null };
 
   if (dday_type === 'milestone') {
     const start_date = document.getElementById('start_date').value;

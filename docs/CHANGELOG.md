@@ -2,6 +2,33 @@
 
 날짜 형식: YYYY-MM-DD (배포 기준)
 
+## [Phase 14] 2026-04-15 — 계정 관리 + 메모 + Google Calendar
+
+### Features
+- **비밀번호 찾기 (14-A):** `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`
+  - 30분 유효 토큰, 1회용 (사용 시 해당 유저의 미사용 토큰 일괄 만료)
+  - 보안상 존재하지 않는 이메일이어도 동일한 성공 응답
+  - 프론트: `forgot-password.html`, `reset-password.html?token=xxx`
+- **비밀번호 변경 (14-B):** `PUT /api/auth/password` (인증 필수)
+  - 프론트: `account.html` (index.html 헤더에 "계정" 링크)
+- **카드 메모 (14-C):** `ddays.memo` 컬럼 (TEXT, nullable, 1000자 제한)
+  - form.html textarea + index.html 카드 내 메모 표시 (개행 유지)
+- **Google Calendar 추가 (14-D):** OAuth 없이 `calendar.google.com/calendar/render` 링크 방식
+  - 카드에 "📅 캘린더" 버튼 → all-day 이벤트 생성 페이지
+  - 마일스톤은 각 마일스톤마다 📅 버튼 제공 (지난 건 제외)
+
+### Infra
+- `nodemailer` 추가 — SMTP 환경변수 미설정 시 콘솔 로그 fallback (개발/임시 운영)
+- 마이그레이션 `003_memo_and_password_reset.sql`
+  - `ddays.memo TEXT` 추가
+  - `password_resets(token, user_id, expires_at, used)` 신설
+
+### Security
+- 비밀번호 찾기 별도 rate limit (1시간/5회) — 스팸/남용 방지
+- 재설정 토큰 32바이트 random hex, 사용 즉시 일괄 만료
+
+---
+
 ## [Governance] 2026-04-15 — 개발 정책 수립
 
 ### Docs

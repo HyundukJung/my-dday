@@ -60,6 +60,10 @@ const api = {
   auth: {
     signup: (email, password) => request('POST', '/api/auth/signup', { email, password }),
     login: (email, password) => request('POST', '/api/auth/login', { email, password }),
+    forgotPassword: (email) => request('POST', '/api/auth/forgot-password', { email }),
+    resetPassword: (token, password) => request('POST', '/api/auth/reset-password', { token, password }),
+    changePassword: (currentPassword, newPassword) =>
+      request('PUT', '/api/auth/password', { currentPassword, newPassword }),
   },
   ddays: {
     list: () => request('GET', '/api/ddays'),
