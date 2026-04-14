@@ -8,6 +8,7 @@
 - 배포 DB에서 테스트 계정 전량 삭제 (`test@test.com`, `debug@test.com`, `newuser@test.com`)
 - 로그인/회원가입에 엄격한 rate limit 적용 (15분당 10회)
   - 전역 rate limit은 100 → 300회로 완화 (일반 사용 방해 방지)
+- `app.set('trust proxy', 1)` 설정 — Railway reverse proxy 뒤에서 per-IP rate limit 정상 동작
 
 ### Bug Fixes
 - `PUT /api/ddays/:id` 에서 `dday_type`만 바꾸고 날짜 누락 시 통과하던 버그 수정

@@ -8,6 +8,10 @@ const pool = require('./db');
 
 const app = express();
 
+// Railway/Vercel 같은 reverse proxy 뒤에서 req.ip가 올바르게 잡히도록 설정
+// (rate limit의 per-IP 식별에 필수)
+app.set('trust proxy', 1);
+
 // --- 미들웨어 등록 순서 ---
 // 1. 보안 헤더 (API 서버에는 CSP 불필요 — 프론트와 교차 출처라 효과 없음)
 app.use(helmet({
