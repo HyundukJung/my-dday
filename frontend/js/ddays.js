@@ -12,6 +12,15 @@ let currentFilter = 'all';
 let shareTargetId = null;
 let selectedTheme = 'birthday';
 
+// DB DATE(ISO) → 로컬 자정 Date 객체 (타임존 무관)
+// 예: "2026-02-16T15:00:00.000Z" 또는 "2026-02-17" → 2026-02-17 00:00 로컬
+function parseDbDate(dateStr) {
+  if (!dateStr) return null;
+  const ymd = String(dateStr).slice(0, 10);
+  const [y, m, d] = ymd.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 // --- D-day 목록 로드 ---
 async function loadDdays() {
   try {
@@ -44,9 +53,8 @@ function renderDdays() {
 
     if (isMilestone) {
       // 시작일 기준: 시작일 = 0일째, 100일째 = 시작일 + 100일
-      const start = new Date(d.start_date);
-      start.setHours(0, 0, 0, 0);
-      const elapsed = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+      const start = parseDbDate(d.start_date);
+      const elapsed = Math.round((today - start) / (1000 * 60 * 60 * 24));
 
       if (elapsed >= 0) {
         countText = `D + ${elapsed}`;
@@ -65,7 +73,7 @@ function renderDdays() {
       let nextHtml = '';
       if (next) {
         const remaining = next.days - elapsed;
-        const targetDate = new Date(next.target_date);
+        const targetDate = parseDbDate(next.target_date);
         nextHtml = `
           <div class="milestone-next">
             <span>다음: <strong>${next.days}일</strong> (${targetDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })})</span>
@@ -78,7 +86,7 @@ function renderDdays() {
 
       const listHtml = milestones.map(m => {
         const isPast = m.days <= elapsed;
-        const md = new Date(m.target_date);
+        const md = parseDbDate(m.target_date);
         const ds = md.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
         return `<li class="${isPast ? 'passed' : 'upcoming'}"><span>${m.days}일</span><span>${ds}</span></li>`;
       }).join('');
@@ -91,9 +99,8 @@ function renderDdays() {
         </div>
       `;
     } else {
-      const target = new Date(d.target_date);
-      target.setHours(0, 0, 0, 0);
-      const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+      const target = parseDbDate(d.target_date);
+      const diff = Math.round((target - today) / (1000 * 60 * 60 * 24));
 
       if (diff === 0) {
         countText = 'D-DAY';

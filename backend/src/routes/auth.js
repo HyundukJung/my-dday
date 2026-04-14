@@ -2,14 +2,25 @@ const express = require('express');
 const { body } = require('express-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const pool = require('../db');
 const validate = require('../middleware/validate');
 
 const router = express.Router();
 
+// 인증 엔드포인트 전용 엄격한 제한 (브루트포스 방지)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10, // 15분당 10회
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+
 // 회원가입
 router.post(
   '/signup',
+  authLimiter,
   [
     body('email').isEmail().withMessage('올바른 이메일 형식이 아닙니다.'),
     body('password').isLength({ min: 8 }).withMessage('비밀번호는 최소 8자 이상이어야 합니다.'),
@@ -53,6 +64,7 @@ router.post(
 // 로그인
 router.post(
   '/login',
+  authLimiter,
   [
     body('email').isEmail().withMessage('올바른 이메일 형식이 아닙니다.'),
     body('password').notEmpty().withMessage('비밀번호를 입력해주세요.'),

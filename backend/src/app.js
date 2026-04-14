@@ -9,7 +9,7 @@ const pool = require('./db');
 const app = express();
 
 // --- 미들웨어 등록 순서 ---
-// 1. 보안 헤더
+// 1. 보안 헤더 (API 서버에는 CSP 불필요 — 프론트와 교차 출처라 효과 없음)
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
@@ -28,10 +28,12 @@ app.use(cors({
 // 3. JSON 파싱
 app.use(express.json());
 
-// 4. 요청 제한 (15분당 100회)
+// 4. 전역 요청 제한 (15분당 300회 — 로그인/회원가입은 별도로 더 엄격)
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 }));
 

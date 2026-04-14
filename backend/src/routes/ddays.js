@@ -37,13 +37,28 @@ async function insertMilestones(client, ddayId, startDate, daysList) {
 }
 
 const ddayValidation = [
-  body('title').trim().notEmpty().withMessage('제목을 입력해주세요.'),
+  body('title').trim().notEmpty().withMessage('제목을 입력해주세요.').isLength({ max: 100 }).withMessage('제목은 100자 이하여야 합니다.'),
   body('category').isIn(CATEGORIES).withMessage('카테고리는 birthday, anniversary, couple, exam 중 하나여야 합니다.'),
   body('dday_type').optional().isIn(['fixed', 'milestone']).withMessage('dday_type은 fixed 또는 milestone이어야 합니다.'),
   body('target_date').optional({ nullable: true }).isDate().withMessage('올바른 날짜 형식이 아닙니다. (YYYY-MM-DD)'),
   body('start_date').optional({ nullable: true }).isDate().withMessage('올바른 시작일 형식이 아닙니다. (YYYY-MM-DD)'),
   body('milestone_days').optional().isArray().withMessage('milestone_days는 배열이어야 합니다.'),
 ];
+
+// 타입별 필수 필드 검증 (POST/PUT 공통)
+function validateTypeFields(body) {
+  const type = body.dday_type || 'fixed';
+  if (type === 'milestone') {
+    if (!body.start_date) {
+      return '시작일(start_date)을 입력해주세요.';
+    }
+  } else {
+    if (!body.target_date) {
+      return '목표 날짜(target_date)를 입력해주세요.';
+    }
+  }
+  return null;
+}
 
 // GET /api/ddays — 목록 조회 (마일스톤 포함)
 router.get('/', async (req, res) => {
@@ -83,15 +98,8 @@ router.post('/', ddayValidation, validate, async (req, res) => {
   try {
     const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days } = req.body;
 
-    if (dday_type === 'milestone') {
-      if (!start_date) {
-        return res.status(400).json({ error: '시작일(start_date)을 입력해주세요.' });
-      }
-    } else {
-      if (!target_date) {
-        return res.status(400).json({ error: '목표 날짜(target_date)를 입력해주세요.' });
-      }
-    }
+    const typeError = validateTypeFields(req.body);
+    if (typeError) return res.status(400).json({ error: typeError });
 
     await client.query('BEGIN');
 
@@ -135,6 +143,9 @@ router.put('/:id', ddayValidation, validate, async (req, res) => {
   const client = await pool.connect();
   try {
     const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days } = req.body;
+
+    const typeError = validateTypeFields(req.body);
+    if (typeError) return res.status(400).json({ error: typeError });
 
     await client.query('BEGIN');
 

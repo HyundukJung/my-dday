@@ -27,8 +27,10 @@ async function loadShare() {
     const d = res.data;
     const theme = d.share_theme || d.category;
 
-    const target = new Date(d.target_date);
-    target.setHours(0, 0, 0, 0);
+    // DB DATE → 로컬 자정 (타임존 무관)
+    const ymd = String(d.target_date).slice(0, 10);
+    const [y, m, day] = ymd.split('-').map(Number);
+    const target = new Date(y, m - 1, day);
     const dateStr = target.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
     let countText;
