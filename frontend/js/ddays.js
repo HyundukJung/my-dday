@@ -38,23 +38,76 @@ function renderDdays() {
   list.innerHTML = filtered.map(d => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const target = new Date(d.target_date);
-    target.setHours(0, 0, 0, 0);
-    const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+    const isMilestone = d.dday_type === 'milestone';
 
-    let countText, countClass;
-    if (diff === 0) {
-      countText = 'D-DAY';
-      countClass = 'today';
-    } else if (diff > 0) {
-      countText = `D - ${diff}`;
-      countClass = 'future';
+    let countText, countClass, dateStr, milestoneHtml = '';
+
+    if (isMilestone) {
+      // 시작일 기준: 시작일 = 0일째, 100일째 = 시작일 + 100일
+      const start = new Date(d.start_date);
+      start.setHours(0, 0, 0, 0);
+      const elapsed = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+
+      if (elapsed >= 0) {
+        countText = `D + ${elapsed}`;
+        countClass = elapsed === 0 ? 'today' : 'future';
+      } else {
+        countText = `D - ${Math.abs(elapsed)}`;
+        countClass = 'future';
+      }
+
+      dateStr = start.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) + ' 시작';
+
+      // 다음 마일스톤 찾기
+      const milestones = (d.milestones || []).slice().sort((a, b) => a.days - b.days);
+      const next = milestones.find(m => m.days > elapsed);
+
+      let nextHtml = '';
+      if (next) {
+        const remaining = next.days - elapsed;
+        const targetDate = new Date(next.target_date);
+        nextHtml = `
+          <div class="milestone-next">
+            <span>다음: <strong>${next.days}일</strong> (${targetDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })})</span>
+            <strong>D - ${remaining}</strong>
+          </div>
+        `;
+      } else {
+        nextHtml = `<div class="milestone-next text-muted">모든 마일스톤이 지났습니다</div>`;
+      }
+
+      const listHtml = milestones.map(m => {
+        const isPast = m.days <= elapsed;
+        const md = new Date(m.target_date);
+        const ds = md.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+        return `<li class="${isPast ? 'passed' : 'upcoming'}"><span>${m.days}일</span><span>${ds}</span></li>`;
+      }).join('');
+
+      milestoneHtml = `
+        <div class="milestone-summary">
+          ${nextHtml}
+          <div class="milestone-toggle" onclick="toggleMilestones(this)">▼ 전체 보기</div>
+          <ul class="milestone-list" style="display:none;">${listHtml}</ul>
+        </div>
+      `;
     } else {
-      countText = `D + ${Math.abs(diff)}`;
-      countClass = 'past';
-    }
+      const target = new Date(d.target_date);
+      target.setHours(0, 0, 0, 0);
+      const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
 
-    const dateStr = target.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+      if (diff === 0) {
+        countText = 'D-DAY';
+        countClass = 'today';
+      } else if (diff > 0) {
+        countText = `D - ${diff}`;
+        countClass = 'future';
+      } else {
+        countText = `D + ${Math.abs(diff)}`;
+        countClass = 'past';
+      }
+
+      dateStr = target.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
 
     return `
       <div class="dday-card">
@@ -62,8 +115,9 @@ function renderDdays() {
           <span class="dday-category">${CATEGORY_EMOJI[d.category] || ''}</span>
           <span class="dday-title">${escapeHtml(d.title)}</span>
         </div>
-        <div class="dday-count ${countClass}">${diff === 0 ? '&#127881; ' : ''}${countText}</div>
+        <div class="dday-count ${countClass}">${countText === 'D-DAY' ? '&#127881; ' : ''}${countText}</div>
         <div class="dday-date">${dateStr}</div>
+        ${milestoneHtml}
         <div class="dday-actions">
           <a href="form.html?id=${d.id}" class="btn btn-outline btn-sm">수정</a>
           <button class="btn btn-outline btn-sm" onclick="openShareModal(${d.id})">공유</button>
@@ -72,6 +126,17 @@ function renderDdays() {
       </div>
     `;
   }).join('');
+}
+
+function toggleMilestones(el) {
+  const list = el.nextElementSibling;
+  if (list.style.display === 'none') {
+    list.style.display = 'block';
+    el.textContent = '▲ 접기';
+  } else {
+    list.style.display = 'none';
+    el.textContent = '▼ 전체 보기';
+  }
 }
 
 function escapeHtml(text) {

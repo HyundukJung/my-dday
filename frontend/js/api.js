@@ -63,8 +63,8 @@ const api = {
   },
   ddays: {
     list: () => request('GET', '/api/ddays'),
-    create: (title, category, target_date) => request('POST', '/api/ddays', { title, category, target_date }),
-    update: (id, title, category, target_date) => request('PUT', `/api/ddays/${id}`, { title, category, target_date }),
+    create: (payload) => request('POST', '/api/ddays', payload),
+    update: (id, payload) => request('PUT', `/api/ddays/${id}`, payload),
     remove: (id) => request('DELETE', `/api/ddays/${id}`),
     createShare: (id, share_theme) => request('POST', `/api/ddays/${id}/share`, { share_theme }),
     removeShare: (id) => request('DELETE', `/api/ddays/${id}/share`),

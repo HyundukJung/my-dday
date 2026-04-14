@@ -17,6 +17,22 @@
     <div class="card">
       <form id="dday-form">
         <div class="input-group">
+          <label>유형</label>
+          <div class="type-toggle">
+            <label class="type-option">
+              <input type="radio" name="dday_type" value="fixed" checked>
+              <span>일반 D-day</span>
+              <small>고정된 미래 날짜</small>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="dday_type" value="milestone">
+              <span>마일스톤</span>
+              <small>시작일 + 100/200/300일...</small>
+            </label>
+          </div>
+        </div>
+
+        <div class="input-group">
           <label for="title">제목</label>
           <input type="text" id="title" placeholder="예: 민지 생일" maxlength="100" required>
         </div>
@@ -31,9 +47,37 @@
           </select>
         </div>
 
-        <div class="input-group">
+        <!-- 일반 D-day -->
+        <div class="input-group" id="fixed-fields">
           <label for="target_date">날짜</label>
-          <input type="date" id="target_date" required>
+          <input type="date" id="target_date">
+        </div>
+
+        <!-- 마일스톤 -->
+        <div id="milestone-fields" style="display: none;">
+          <div class="input-group">
+            <label for="start_date">시작일</label>
+            <input type="date" id="start_date">
+            <small class="help-text">예: 사귀기 시작한 날, 다이어트 시작한 날</small>
+          </div>
+
+          <div class="input-group">
+            <label>마일스톤 (며칠째)</label>
+            <div class="milestone-presets" id="milestone-presets">
+              <label><input type="checkbox" value="100" checked> 100일</label>
+              <label><input type="checkbox" value="200" checked> 200일</label>
+              <label><input type="checkbox" value="300" checked> 300일</label>
+              <label><input type="checkbox" value="365" checked> 1년 (365일)</label>
+              <label><input type="checkbox" value="500" checked> 500일</label>
+              <label><input type="checkbox" value="730"> 2년 (730일)</label>
+              <label><input type="checkbox" value="1000" checked> 1000일</label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="custom-days">커스텀 추가 (쉼표로 구분)</label>
+            <input type="text" id="custom-days" placeholder="예: 777, 1234">
+          </div>
         </div>
 
         <p id="error-msg" class="error-msg"></p>

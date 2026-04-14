@@ -539,7 +539,7 @@ URL: /share.html?token=abc123xyz
 
 ---
 
-## Phase 9 — 배포 [ ]
+## Phase 9 — 배포 [✅]
 
 ### Railway (백엔드 + DB)
 - [ ] Railway 프로젝트 생성

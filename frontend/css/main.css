@@ -169,3 +169,131 @@ body {
 .mt-12 { margin-top: 12px; }
 .mt-16 { margin-top: 16px; }
 .mt-24 { margin-top: 24px; }
+
+/* 유형 토글 */
+.type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.type-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.type-option:has(input:checked) {
+  border-color: var(--color-primary);
+  background: rgba(91, 110, 225, 0.06);
+}
+
+.type-option input[type="radio"] {
+  display: none;
+}
+
+.type-option span {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.type-option small {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* 마일스톤 프리셋 체크박스 */
+.milestone-presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.milestone-presets label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.milestone-presets input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+.help-text {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* 마일스톤 카드 표시 */
+.milestone-summary {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--color-border);
+}
+
+.milestone-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.milestone-next strong {
+  color: var(--color-primary);
+}
+
+.milestone-toggle {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  padding: 6px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+
+.milestone-list {
+  list-style: none;
+  margin-top: 8px;
+  padding: 0;
+}
+
+.milestone-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--color-bg);
+}
+
+.milestone-list li:last-child {
+  border-bottom: none;
+}
+
+.milestone-list .passed {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.milestone-list .upcoming {
+  color: var(--color-text);
+  font-weight: 600;
+}
