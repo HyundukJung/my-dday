@@ -8,9 +8,10 @@ const pool = require('./db');
 
 const app = express();
 
-// Railway/Vercel 같은 reverse proxy 뒤에서 req.ip가 올바르게 잡히도록 설정
-// (rate limit의 per-IP 식별에 필수)
-app.set('trust proxy', 1);
+// Railway는 edge(Fastly) + 내부 proxy 등 다단계 프록시를 거침.
+// 'true'는 모든 X-Forwarded-For를 신뢰 — Railway 내부에서만 도달 가능하므로 안전.
+// 이렇게 해야 per-IP rate limit이 실사용자 단위로 정확히 동작함.
+app.set('trust proxy', true);
 
 // --- 미들웨어 등록 순서 ---
 // 1. 보안 헤더 (API 서버에는 CSP 불필요 — 프론트와 교차 출처라 효과 없음)
