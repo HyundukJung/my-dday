@@ -73,3 +73,15 @@ const api = {
     get: (token) => request('GET', `/api/share/${token}`),
   },
 };
+
+// --- PWA Service Worker 등록 ---
+if ('serviceWorker' in navigator
+    && window.location.protocol !== 'file:'
+    && window.location.hostname !== 'localhost'
+    && window.location.hostname !== '127.0.0.1') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('Service Worker 등록 실패:', err);
+    });
+  });
+}
