@@ -2,6 +2,16 @@
 
 날짜 형식: YYYY-MM-DD (배포 기준)
 
+## [Governance] 2026-04-15 — 개발 정책 수립
+
+### Docs
+- `docs/DEV_POLICY.md` 신설 — 커밋 전 문서 동기화 필수화
+- `CLAUDE.md` 신설 (프로젝트 루트) — AI 에이전트 개발 지침 자동 로드
+- 정책 요지: 코드 변경 시 관련 문서(PRD/TRD/DEVPLAN/CHANGELOG/context) 동기화 필수
+- 커밋 메시지 컨벤션 정립 (Phase/feat/fix/docs/security/refactor/chore/test/hotfix)
+
+---
+
 ## [Phase 13] 2026-04-14 — 품질 개선
 
 ### Security
