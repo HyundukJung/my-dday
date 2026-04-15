@@ -613,7 +613,7 @@ CREATE TABLE push_subscriptions (
 | 11-C | Google Calendar 연동 | ⬜ 선택 |
 | 12 | PWA (홈 화면 설치, SW 오프라인) | ✅ 완료 |
 | 13 | 품질 개선 (보안/타임존/검증) | ✅ 완료 |
-| 14 | 계정(비밀번호) + 메모 + GCal | ✅ 완료 |
+| 14 | 계정(비밀번호) + 메모 + GCal | ✅ 완료 (2026-04-16 검증 완료) |
 
 ---
 
@@ -655,10 +655,15 @@ SMTP_FROM="My D-day <no-reply@mydday.app>"
 ```
 모두 미설정 시 → 콘솔 로그 fallback.
 
-### 검증
-- [ ] 존재하지 않는 이메일로 비밀번호 찾기 요청 → 보안상 동일한 성공 응답 반환
-- [ ] 발급된 토큰으로 재설정 성공 → 로그인 가능
-- [ ] 만료된/사용된 토큰 → 400
-- [ ] 로그인 후 비밀번호 변경 → 새 비밀번호로 로그인 가능
-- [ ] D-day 추가 시 메모 입력 → 카드에 표시
-- [ ] GCal 버튼 클릭 → 이벤트 생성 페이지로 이동, 제목/날짜/메모 채워짐
+### 검증 (2026-04-16 완료)
+- [x] 존재하지 않는 이메일로 비밀번호 찾기 요청 → 보안상 동일한 성공 응답 반환
+- [x] 발급된 토큰으로 재설정 성공 → 로그인 가능
+- [x] 만료된/사용된 토큰 → 400
+- [x] 로그인 후 비밀번호 변경 → 새 비밀번호로 로그인 가능
+- [x] D-day 추가 시 메모 입력 → 카드에 표시
+- [x] GCal 버튼 클릭 → 이벤트 생성 페이지로 이동, 제목/날짜/메모 채워짐
+- [x] 프로덕션 E2E (https://my-dday-production.up.railway.app) 전 시나리오 통과
+
+### 후속 Hotfix (2026-04-16)
+- `chore`: `validate: { trustProxy: false }` — Railway 환경에서 `ERR_ERL_PERMISSIVE_TRUST_PROXY` 경고 억제
+- `fix`: Service Worker HTML 요청을 **network-first** 로 변경 — Phase 14 배포 후 구버전 `index.html` 이 캐시에서 반환되던 문제 해결, `CACHE_NAME` v1→v2, 신규 HTML 3종 pre-cache 등록

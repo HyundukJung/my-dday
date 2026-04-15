@@ -5,12 +5,16 @@
 
 ---
 
-## 현재 상태 (2026-04-15)
-- **MVP + 확장 기능 배포 완료**
+## 현재 상태 (2026-04-16)
+- **MVP + 확장 기능 배포 완료, 프로덕션 E2E 검증 완료**
   - 프론트: https://my-dday.vercel.app
   - 백엔드: https://my-dday-production.up.railway.app
 - iPhone/Android에 **홈 화면 설치 가능 (PWA)**
 - Phase 0~14 완료 (비밀번호 찾기/변경, 메모, Google Calendar 링크 포함)
+- SW는 HTML network-first — 새 배포 즉시 반영
+
+### 🟡 운영 주의사항
+- 비밀번호 찾기 메일 발송은 **SMTP 환경변수 미설정 시 서버 로그 fallback**. 실제 발송 원하면 Railway Variables 에 `SMTP_*` 설정 필요 (README/TRD 10장 참조)
 
 ---
 
