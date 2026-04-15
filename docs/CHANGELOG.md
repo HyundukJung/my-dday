@@ -2,6 +2,15 @@
 
 날짜 형식: YYYY-MM-DD (배포 기준)
 
+## [Hotfix] 2026-04-16 — rate limiter 경고 억제
+
+### Chore
+- `authLimiter` / `forgotLimiter` 에 `validate: { trustProxy: false }` 추가
+  - Railway `trust proxy=true` 환경에서 뜨던 `ERR_ERL_PERMISSIVE_TRUST_PROXY` 경고 제거
+  - 동작 변화 없음 (trust proxy 설정은 그대로 의도된 구성)
+
+---
+
 ## [Phase 14] 2026-04-15 — 계정 관리 + 메모 + Google Calendar
 
 ### Features

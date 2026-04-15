@@ -17,6 +17,7 @@ const authLimiter = rateLimit({
   max: 10, // 15분당 10회
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false }, // Railway trust proxy=true 사용 시 경고 억제
   message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 });
 
@@ -26,6 +27,7 @@ const forgotLimiter = rateLimit({
   max: 5, // 1시간당 5회
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false },
   message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 });
 
