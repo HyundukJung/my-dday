@@ -31,7 +31,7 @@ async function loadShare() {
     const ymd = String(d.target_date).slice(0, 10);
     const [y, m, day] = ymd.split('-').map(Number);
     const target = new Date(y, m - 1, day);
-    const dateStr = target.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    const dateStr = target.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
 
     let countText;
     if (d.days_diff === 0) countText = 'D-DAY';

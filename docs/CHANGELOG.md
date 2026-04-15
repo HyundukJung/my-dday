@@ -2,6 +2,15 @@
 
 날짜 형식: YYYY-MM-DD (배포 기준)
 
+## [UX] 2026-04-16 — 날짜 표시에 요일 추가
+
+### Changes
+- D-day 카드/공유 페이지의 날짜 옆에 **요일 약식** 표시 (예: `2026년 5월 15일 금`)
+- 영향 파일: `frontend/js/ddays.js`, `frontend/js/share.js`
+- `CACHE_NAME` v2 → v3 bump — 캐시된 JS 즉시 교체
+
+---
+
 ## [Hotfix] 2026-04-16 — Service Worker 캐시 전략 수정
 
 ### Bug Fixes

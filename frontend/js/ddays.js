@@ -64,7 +64,7 @@ function renderDdays() {
         countClass = 'future';
       }
 
-      dateStr = start.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) + ' 시작';
+      dateStr = start.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }) + ' 시작';
 
       // 다음 마일스톤 찾기
       const milestones = (d.milestones || []).slice().sort((a, b) => a.days - b.days);
@@ -76,7 +76,7 @@ function renderDdays() {
         const targetDate = parseDbDate(next.target_date);
         nextHtml = `
           <div class="milestone-next">
-            <span>다음: <strong>${next.days}일</strong> (${targetDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })})</span>
+            <span>다음: <strong>${next.days}일</strong> (${targetDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })})</span>
             <strong>D - ${remaining}</strong>
           </div>
         `;
@@ -87,7 +87,7 @@ function renderDdays() {
       const listHtml = milestones.map(m => {
         const isPast = m.days <= elapsed;
         const md = parseDbDate(m.target_date);
-        const ds = md.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+        const ds = md.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
         const gcalBtn = !isPast
           ? `<button class="milestone-gcal-btn gcal-btn" data-title="${escapeHtml(d.title)} ${m.days}일" data-date="${m.target_date}" data-memo="${escapeHtml(d.memo || '')}" title="Google 캘린더에 추가">📅</button>`
           : '';
@@ -116,7 +116,7 @@ function renderDdays() {
         countClass = 'past';
       }
 
-      dateStr = target.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+      dateStr = target.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
     }
 
     const memoHtml = d.memo
