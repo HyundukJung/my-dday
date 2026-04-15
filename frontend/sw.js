@@ -1,7 +1,8 @@
 // Service Worker — My D-day
-// 전략: 정적 자원은 cache-first, API는 network-first (백엔드는 캐시하지 않음)
+// 전략: HTML은 network-first (새 배포 즉시 반영), 기타 정적 자원은 cache-first.
+//       API는 동일 출처가 아니므로 간섭하지 않음.
 
-const CACHE_NAME = 'my-dday-v1';
+const CACHE_NAME = 'my-dday-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -9,6 +10,9 @@ const STATIC_ASSETS = [
   '/signup.html',
   '/form.html',
   '/share.html',
+  '/account.html',
+  '/forgot-password.html',
+  '/reset-password.html',
   '/css/reset.css',
   '/css/main.css',
   '/css/themes.css',
@@ -23,7 +27,6 @@ const STATIC_ASSETS = [
   '/icons/apple-touch-icon.png',
 ];
 
-// 설치: 정적 자원 사전 캐시
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
@@ -31,7 +34,6 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// 활성화: 옛 캐시 삭제
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -41,35 +43,48 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// 요청 처리
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 동일 출처가 아니면(API 등) 네트워크 사용, 캐시 간섭 없음
+  // 동일 출처가 아니면(API 등) 간섭하지 않음
   if (url.origin !== self.location.origin) return;
 
-  // GET만 캐싱
+  // GET만 처리
   if (request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request)
+  const accept = request.headers.get('accept') || '';
+  const isHTML = request.mode === 'navigate' || accept.includes('text/html');
+
+  if (isHTML) {
+    // HTML: network-first — 새 배포 즉시 반영, 오프라인 시 캐시 폴백
+    event.respondWith(
+      fetch(request)
         .then((response) => {
-          // 동적으로 도착한 정적 자원도 캐시에 추가
           if (response.ok) {
             const copy = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
           }
           return response;
         })
-        .catch(() => {
-          // 오프라인 + 캐시 미스: index.html 폴백 (HTML 요청일 때만)
-          if (request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('/index.html');
-          }
-        });
+        .catch(() =>
+          caches.match(request).then((c) => c || caches.match('/index.html'))
+        )
+    );
+    return;
+  }
+
+  // 기타 정적 자원: cache-first
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+      return fetch(request).then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        }
+        return response;
+      });
     })
   );
 });

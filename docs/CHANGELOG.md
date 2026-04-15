@@ -2,6 +2,20 @@
 
 날짜 형식: YYYY-MM-DD (배포 기준)
 
+## [Hotfix] 2026-04-16 — Service Worker 캐시 전략 수정
+
+### Bug Fixes
+- `sw.js` HTML 요청을 **network-first** 로 변경 (기존은 cache-first)
+  - Phase 14 배포 후에도 구버전 `index.html`이 캐시에서 반환되던 문제 해결
+- `CACHE_NAME` `v1` → `v2` bump — 활성화 시 옛 캐시 자동 삭제
+- Phase 14 신규 HTML(`account.html`, `forgot-password.html`, `reset-password.html`)을 pre-cache 목록에 추가
+
+### 영향
+- API 요청은 기존처럼 SW 간섭 없음 (교차 출처)
+- 기타 정적 자원(CSS/JS/이미지)은 기존처럼 cache-first 유지 (속도 이점)
+
+---
+
 ## [Hotfix] 2026-04-16 — rate limiter 경고 억제
 
 ### Chore
