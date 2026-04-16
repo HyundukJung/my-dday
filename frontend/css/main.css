@@ -31,6 +31,7 @@ body {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 20px 16px;
+  overflow-x: hidden;
 }
 
 /* 카드 */
@@ -39,6 +40,7 @@ body {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 20px;
+  overflow: hidden;
 }
 
 /* 버튼 */
@@ -107,12 +109,23 @@ body {
 .input-group input,
 .input-group select {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
   background: var(--color-surface);
   transition: border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* iOS date input 최적화 */
+.input-group input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 44px;
 }
 
 .input-group input:focus,
@@ -338,4 +351,34 @@ body {
 .input-group textarea:focus {
   outline: none;
   border-color: var(--color-primary);
+}
+
+/* 소형 기기 대응 (iPhone SE 등 375px 이하) */
+@media (max-width: 375px) {
+  .container {
+    padding: 16px 12px;
+  }
+  .card {
+    padding: 16px;
+  }
+  .input-group input,
+  .input-group select,
+  .input-group textarea {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+  .type-toggle {
+    grid-template-columns: 1fr;
+  }
+  .milestone-presets {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* safe area 대응 (iPhone 노치/다이나믹 아일랜드) */
+@supports (padding: env(safe-area-inset-left)) {
+  .container {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
 }
