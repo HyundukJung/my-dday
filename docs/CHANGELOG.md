@@ -34,6 +34,15 @@
 
 ---
 
+## [Hotfix] 2026-04-16 — iOS PWA date input 오버플로우 수정
+
+### Bug Fixes
+- iOS PWA 전체화면 모드에서 `input[type="date"]` 필드가 우측으로 밀리는 문제 수정
+- date input에 `display:block`, `box-sizing:border-box`, `overflow:hidden` 적용
+- SW 캐시 v3 → v4 (CSS 변경 즉시 반영)
+
+---
+
 ## [Phase 14] 2026-04-15 — 계정 관리 + 메모 + Google Calendar
 
 ### Features

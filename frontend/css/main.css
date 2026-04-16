@@ -108,24 +108,28 @@ body {
 
 .input-group input,
 .input-group select {
+  display: block;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 0.95rem;
+  font-size: 1rem;
   background: var(--color-surface);
   transition: border-color 0.2s;
   -webkit-appearance: none;
   appearance: none;
+  box-sizing: border-box;
 }
 
-/* iOS date input 최적화 */
+/* iOS date input — PWA 전체화면에서 오버플로우 방지 */
 .input-group input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
   min-height: 44px;
+  position: relative;
+  overflow: hidden;
 }
 
 .input-group input:focus,
