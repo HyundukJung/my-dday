@@ -2,7 +2,7 @@
 // 전략: HTML은 network-first (새 배포 즉시 반영), 기타 정적 자원은 cache-first.
 //       API는 동일 출처가 아니므로 간섭하지 않음.
 
-const CACHE_NAME = 'my-dday-v7';
+const CACHE_NAME = 'my-dday-v8';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -75,17 +75,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 기타 정적 자원: cache-first
+  // 기타 정적 자원(JS/CSS/이미지): stale-while-revalidate
+  // 캐시를 즉시 주되(빠름), 백그라운드로 항상 새 버전을 받아 캐시를 갱신 →
+  // JS/CSS를 고쳐도 다음 방문이면 자동으로 최신본이 적용됨 (캐시 버전 안 올려도 됨).
   event.respondWith(
     caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        }
-        return response;
-      });
+      const fetchPromise = fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => cached);
+      return cached || fetchPromise;
     })
   );
 });
