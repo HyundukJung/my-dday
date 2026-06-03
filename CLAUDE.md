@@ -70,6 +70,8 @@ Phase/작업을 "완료"로 표시하려면 다음을 **모두** 만족해야 �
 | [docs/DEVPLAN.md](docs/DEVPLAN.md) | Phase별 개발 계획 + 진행 상황 |
 | [docs/CHANGELOG.md](docs/CHANGELOG.md) | 배포별 변경 이력 |
 | [docs/context.md](docs/context.md) | 프로젝트 빠른 개요 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | **비개발자용 구조 안내** (레이어/역할/배포 흐름) |
+| [docs/MIGRATION.md](docs/MIGRATION.md) | 호스팅 이전 가이드 (Neon+Render) |
 | [docs/DEV_POLICY.md](docs/DEV_POLICY.md) | 개발 정책 (상세) |
 
 ---
