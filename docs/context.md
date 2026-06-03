@@ -5,10 +5,12 @@
 
 ---
 
-## 현재 상태 (2026-04-16)
-- **MVP + 확장 기능 배포 완료, 프로덕션 E2E 검증 완료**
-  - 프론트: https://my-dday.vercel.app
-  - 백엔드: https://my-dday-production.up.railway.app
+## 현재 상태 (2026-06-03)
+- **MVP + 확장 기능 배포 완료**
+  - 프론트: https://my-dday.vercel.app (Vercel)
+  - 백엔드: https://my-dday-backend.onrender.com (Render — Railway에서 이전)
+  - DB: Neon Postgres (Railway에서 이전)
+  - ⚠️ Render 무료 인스턴스는 15분 무요청 시 슬립 → 첫 접속 ~50초 콜드 스타트
 - iPhone/Android에 **홈 화면 설치 가능 (PWA)**
 - Phase 0~14 완료 (비밀번호 찾기/변경, 메모, Google Calendar 링크 포함)
 - SW는 HTML network-first — 새 배포 즉시 반영

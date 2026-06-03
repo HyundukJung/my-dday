@@ -285,10 +285,17 @@ POST/PUT/DELETE: 캐시 미사용
 
 ## 10. 배포 & 환경변수
 
-### Railway (백엔드)
+> 2026-06-03 호스팅 이전: Railway(체험 만료) → **Render(백엔드) + Neon(Postgres)**.
+> 프론트는 Vercel 유지. 자세한 절차는 [MIGRATION.md](MIGRATION.md) 참조.
+
+### Render (백엔드)
+- Root Directory: `backend` / Build: `npm install` / Start: `node src/server.js` / Instance: Free
+- 주소: `https://my-dday-backend.onrender.com`
+- 무료 인스턴스는 15분 무요청 시 슬립 → 첫 요청 ~50초 콜드 스타트
+
 | 변수 | 값 |
 |---|---|
-| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (내부 참조) |
+| `DATABASE_URL` | Neon 연결 문자열 (`postgresql://...neon.tech/neondb?sslmode=require`) |
 | `JWT_SECRET` | 랜덤 32자 이상 |
 | `JWT_EXPIRES_IN` | `7d` |
 | `NODE_ENV` | `production` |

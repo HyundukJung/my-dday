@@ -2,6 +2,21 @@
 
 날짜 형식: YYYY-MM-DD (배포 기준)
 
+## [Infra] 2026-06-03 — 호스팅 이전: Railway → Render + Neon
+
+### Changes
+- Railway 무료 체험 만료로 백엔드+DB 다운 → 무료 스택으로 이전
+  - 백엔드: **Render** (`https://my-dday-backend.onrender.com`)
+  - DB: **Neon** Postgres (`000_full_schema.sql`로 스키마 초기화)
+  - 프론트: Vercel 유지
+- `frontend/js/api.js` — `BASE_URL`을 Railway → Render 주소로 교체
+- `backend/src/app.js` — 전역 rate limiter에 `validate: { trustProxy: false }` 추가
+  - Render 프록시 뒤(`trust proxy=true`)에서 뜨던 `ERR_ERL_PERMISSIVE_TRUST_PROXY` 경고 제거
+- `CACHE_NAME` v5 → v6
+- 검증: `/health` 200, `/api/ddays` 401, DB 연결/메일 설정 정상 (배포 로그 확인)
+
+---
+
 ## [Fix] 2026-06-03 — 마일스톤 D-day 공유 시 날짜 깨짐 수정
 
 ### Bug Fixes

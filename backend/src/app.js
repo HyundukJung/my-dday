@@ -39,6 +39,7 @@ app.use(rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false }, // trust proxy=true(프록시 뒤) 환경에서 뜨는 경고 억제
   message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 }));
 
