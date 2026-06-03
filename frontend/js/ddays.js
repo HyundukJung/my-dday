@@ -85,21 +85,26 @@ function renderDdays() {
         nextHtml = `<div class="milestone-next text-muted">모든 마일스톤이 지났습니다</div>`;
       }
 
+      const hasUpcoming = milestones.some(m => m.days > elapsed);
       const listHtml = milestones.map(m => {
         const isPast = m.days <= elapsed;
         const md = parseDbDate(m.target_date);
         const ds = md.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
-        const gcalBtn = !isPast
-          ? `<button class="milestone-gcal-btn gcal-btn" data-title="${escapeHtml(d.title)} ${m.days}일" data-date="${m.target_date}" data-memo="${escapeHtml(d.memo || '')}" title="Google 캘린더에 추가">📅</button>`
-          : '';
-        return `<li class="${isPast ? 'passed' : 'upcoming'}"><span>${m.days}일</span><span>${ds} ${gcalBtn}</span></li>`;
+        // 아직 안 지난 마일스톤만 캘린더 추가용으로 선택 가능
+        const pick = !isPast
+          ? `<input type="checkbox" class="ms-pick" data-title="${escapeHtml(d.title)} ${m.days}일" data-date="${m.target_date}" data-memo="${escapeHtml(d.memo || '')}">`
+          : '<span class="ms-pick-spacer"></span>';
+        return `<li class="${isPast ? 'passed' : 'upcoming'}"><label class="ms-pick-label">${pick}<span>${m.days}일</span></label><span>${ds}</span></li>`;
       }).join('');
 
       milestoneHtml = `
         <div class="milestone-summary">
           ${nextHtml}
-          <div class="milestone-toggle" onclick="toggleMilestones(this)">▼ 전체 보기</div>
-          <ul class="milestone-list" style="display:none;">${listHtml}</ul>
+          <div class="milestone-toggle" onclick="toggleMilestones(this)">▼ 전체 보기 / 캘린더 추가</div>
+          <div class="milestone-detail" style="display:none;">
+            <ul class="milestone-list">${listHtml}</ul>
+            ${hasUpcoming ? `<button class="btn btn-outline btn-sm ms-cal-add" style="width:100%;margin-top:8px;">📅 선택한 마일스톤 캘린더에 추가</button>` : ''}
+          </div>
         </div>
       `;
     } else {
@@ -124,21 +129,9 @@ function renderDdays() {
       ? `<div class="dday-memo">${escapeHtml(d.memo).replace(/\n/g, '<br>')}</div>`
       : '';
 
-    // 카드 메인 GCal 대상 (fixed는 target_date, milestone은 다음 마일스톤)
-    let mainGcalDate = null;
-    let mainGcalTitle = d.title;
-    if (isMilestone) {
-      const ms = (d.milestones || []).slice().sort((a, b) => a.days - b.days);
-      const next = ms.find(m => m.days > elapsed);
-      if (next) {
-        mainGcalDate = next.target_date;
-        mainGcalTitle = `${d.title} ${next.days}일`;
-      }
-    } else {
-      mainGcalDate = d.target_date;
-    }
-    const gcalMainBtn = mainGcalDate
-      ? `<button class="btn btn-outline btn-sm gcal-btn" data-title="${escapeHtml(mainGcalTitle)}" data-date="${mainGcalDate}" data-memo="${escapeHtml(d.memo || '')}">📅 캘린더</button>`
+    // 카드 메인 GCal 버튼: 고정형만 (마일스톤은 목록에서 선택해 일괄 추가)
+    const gcalMainBtn = !isMilestone
+      ? `<button class="btn btn-outline btn-sm gcal-btn" data-title="${escapeHtml(d.title)}" data-date="${d.target_date}" data-memo="${escapeHtml(d.memo || '')}">📅 캘린더</button>`
       : '';
 
     return `
@@ -167,6 +160,69 @@ document.addEventListener('click', (e) => {
   if (!btn) return;
   openGcal(btn.dataset.title, btn.dataset.date, btn.dataset.memo);
 });
+
+// 선택한 마일스톤들을 캘린더에 추가
+// - 1개: Google 캘린더 등록 페이지 바로 열기 (가장 간편)
+// - 여러 개: .ics 파일 1개로 내려받아 한 번에 가져오기(import)
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.ms-cal-add');
+  if (!btn) return;
+  const card = btn.closest('.dday-card');
+  const picks = Array.from(card.querySelectorAll('.ms-pick:checked'));
+  if (picks.length === 0) {
+    alert('캘린더에 추가할 마일스톤을 1개 이상 선택해주세요.');
+    return;
+  }
+  const events = picks.map(cb => ({ title: cb.dataset.title, date: cb.dataset.date, memo: cb.dataset.memo }));
+  if (events.length === 1) {
+    openGcal(events[0].title, events[0].date, events[0].memo);
+  } else {
+    downloadIcs(events, 'my-dday-마일스톤.ics');
+    alert(`${events.length}개 마일스톤을 .ics 파일로 내려받았습니다.\nGoogle 캘린더 > 설정 > 가져오기에서 이 파일을 선택하면 한 번에 등록됩니다.`);
+  }
+});
+
+// 로컬 날짜 → YYYYMMDD (종일 일정용)
+function icsDate(dateStr, addDay) {
+  const d = parseDbDate(dateStr);
+  if (addDay) d.setDate(d.getDate() + 1);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}${m}${day}`;
+}
+
+function escapeIcs(s) {
+  return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+
+// 여러 종일 일정을 담은 iCalendar(.ics) 문자열 생성
+function buildIcs(events) {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//My D-day//KO//', 'CALSCALE:GREGORIAN'];
+  events.forEach((ev, i) => {
+    lines.push('BEGIN:VEVENT');
+    lines.push(`UID:mydday-${Date.now()}-${i}@my-dday`);
+    lines.push(`DTSTART;VALUE=DATE:${icsDate(ev.date, false)}`);
+    lines.push(`DTEND;VALUE=DATE:${icsDate(ev.date, true)}`); // 종일 DTEND는 다음 날(exclusive)
+    lines.push(`SUMMARY:${escapeIcs(ev.title)}`);
+    if (ev.memo) lines.push(`DESCRIPTION:${escapeIcs(ev.memo)}`);
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
+function downloadIcs(events, filename) {
+  const blob = new Blob([buildIcs(events)], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || 'my-dday.ics';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 function toggleMilestones(el) {
   const list = el.nextElementSibling;

@@ -239,15 +239,29 @@ body {
 .milestone-presets label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
+  gap: 8px;
+  font-size: 0.9rem;
   cursor: pointer;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  user-select: none;
+}
+
+/* 선택된 마일스톤은 칩 전체가 또렷하게 강조 (모바일에서 선택 상태 잘 보이게) */
+.milestone-presets label:has(input:checked) {
+  border-color: var(--color-primary);
+  background: rgba(91, 110, 225, 0.08);
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .milestone-presets input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   accent-color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .help-text {
@@ -313,6 +327,27 @@ body {
 .milestone-list .upcoming {
   color: var(--color-text);
   font-weight: 600;
+}
+
+/* 마일스톤 캘린더 추가 — 선택 체크박스 */
+.ms-pick-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ms-pick {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.ms-pick-spacer {
+  display: inline-block;
+  width: 18px;
+  flex-shrink: 0;
 }
 
 /* 메모 */
