@@ -25,7 +25,7 @@
 ### 검증 (2026-06-03)
 - [x] 타임존 변환 로직 단위 검증: 자정→UTC 순간 변환, UTC/뉴욕 환산, DST(미 동부 여름 EDT) 정확
 - [x] 로컬(Neon) API E2E: created_tz/display_tz 저장·조회, PUT 시 created_tz 보존 확인
-- [ ] 프로덕션(Render+Vercel) E2E — 배포 후 확인
+- [x] 프로덕션 E2E: Render 백엔드 생성/PUT(created_tz 보존), Neon 마이그레이션 적용, Vercel `timezones.js`·SW v11 배포 확인
 
 ### 비고
 - 메인 카드 목록 전용 표시 (공유 페이지 `share.html`은 미적용)

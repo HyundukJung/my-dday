@@ -615,7 +615,7 @@ CREATE TABLE push_subscriptions (
 | 13 | 품질 개선 (보안/타임존/검증) | ✅ 완료 |
 | 14 | 계정(비밀번호) + 메모 + GCal | ✅ 완료 (2026-04-16 검증 완료) |
 | 15 | 관리자 페이지 | ✅ 완료 (로컬/미리보기 검증, 프로덕션 E2E 대기) |
-| 16 | 카드 기준 시점(타임존) 표시 | ✅ 완료 (로컬 검증, 프로덕션 E2E 대기) |
+| 16 | 카드 기준 시점(타임존) 표시 | ✅ 완료 (프로덕션 E2E 검증 완료) |
 
 ---
 
@@ -715,4 +715,6 @@ SMTP_FROM="My D-day <no-reply@mydday.app>"
 ### 검증 (2026-06-03)
 - [x] 타임존 변환 단위 검증: 자정→UTC 순간, UTC/뉴욕 환산, DST(미 동부 여름 EDT) 정확
 - [x] 로컬(Neon) API E2E: 생성·조회 시 두 필드 저장, PUT 시 `created_tz` 보존 확인
-- [ ] 프로덕션(Render+Vercel) E2E — 배포 후 확인
+- [x] 프로덕션 DB(Neon) 마이그레이션 적용 확인 (`created_tz`/`display_tz` 컬럼)
+- [x] 프로덕션 백엔드(Render) E2E: 생성 시 두 필드 저장, PUT 시 `created_tz` 보존
+- [x] 프로덕션 프론트(Vercel) 배포 확인: `timezones.js` 200, `sw.js` v11, form 드롭다운 노출
