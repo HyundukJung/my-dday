@@ -296,9 +296,9 @@ POST/PUT/DELETE: 캐시 미사용
 | `SMTP_HOST` | (선택) 예: `smtp.gmail.com` — 미설정 시 비밀번호 재설정 메일은 콘솔 로그로만 출력 |
 | `SMTP_PORT` | (선택) 기본 `587` |
 | `SMTP_SECURE` | (선택) `false` |
-| `SMTP_USER` | (선택) 발신 계정 |
-| `SMTP_PASS` | (선택) Gmail 사용 시 "앱 비밀번호" (2FA 필요) |
-| `SMTP_FROM` | (선택) 표시 이름 포함 발신자 |
+| `SMTP_USER` | (선택) 발신 Gmail 계정 |
+| `SMTP_PASS` | (선택) Gmail "앱 비밀번호" (2단계 인증 필요, 공백 없이 16자리) |
+| `SMTP_FROM` | (선택) 표시 이름 포함 발신자. ⚠️ 주소 부분은 반드시 `SMTP_USER`와 동일해야 함 (Gmail이 From을 인증 계정으로 강제) |
 
 ### Vercel (프론트)
 - Root Directory: `frontend`

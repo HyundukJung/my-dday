@@ -2,6 +2,41 @@
 
 날짜 형식: YYYY-MM-DD (배포 기준)
 
+## [Fix] 2026-06-03 — 마일스톤 D-day 공유 시 날짜 깨짐 수정
+
+### Bug Fixes
+- 마일스톤 타입 D-day를 공유하면 공유 페이지에 "Invalid Date" / 잘못된 D값이 표시되던 버그 수정
+  - 원인: 마일스톤 모드는 `target_date`가 NULL인데 [share.js](../backend/src/routes/share.js)가 `target_date`만 읽어 `days_diff`를 계산했음
+  - 수정: 마일스톤이면 `start_date`를 기준 날짜로 사용 → `days_diff`가 음수가 되어 프론트에서 "D + 경과일"("N일째")로 자연스럽게 표시됨 (프론트 수정 불필요)
+- ⚠️ 백엔드 재배포 후 실제 공유 링크로 E2E 검증 필요 (현재 프로덕션 다운 상태라 로컬 로직 검증만 완료)
+
+---
+
+## [Refactor] 2026-06-03 — 프론트 ddays.js 정리
+
+### Changes
+- 사용되지 않는 죽은 함수 `toGcalDate` 제거
+- 마일스톤 경과일(`elapsed`) 중복 계산(카드 본문 + 캘린더 버튼에서 2회) → 1회 계산으로 통합
+- `CACHE_NAME` v4 → v5 bump (변경된 JS 즉시 반영)
+
+---
+
+## [Chore] 2026-06-03 — 비밀번호 재설정 메일 발송(SMTP) 활성화 준비
+
+### Changes
+- `backend/.env.example` — Gmail 앱 비밀번호 발급 안내 및 **From 주소 강제 규칙** 주석 보강
+  - Gmail은 From 주소를 인증 계정(SMTP_USER)으로 강제하므로 `SMTP_FROM` 주소는 Gmail 주소와 동일해야 함
+- `backend/src/server.js` — 기동 검증 강화
+  - `checkMailConfig`: `SMTP_*` 미설정 시 메일이 콘솔 fallback으로만 동작함을 경고
+  - `checkRequiredEnv`: `JWT_SECRET`/`DATABASE_URL` 누락 시 기동 즉시 중단 (인증 토큰이 런타임에 조용히 깨지는 사고 방지)
+- `backend/src/migrations/000_full_schema.sql` 신규 — 001+002+003을 합친 통합 스키마. 신규 DB(Neon 등) 초기화 시 한 번에 실행용
+
+### 운영 적용 (코드 외 — 직접 설정)
+- 메일 발송 수단: Gmail SMTP + 앱 비밀번호 (2단계 인증 필요). 로컬 `.env`에서 실제 발송 검증 완료 ✅
+- 호스팅 이전 예정: Railway 체험 만료로 백엔드+DB 다운 → **Neon(DB) + Render(백엔드)** 무료 스택으로 이전 (진행 중)
+
+---
+
 ## [UX] 2026-04-16 — 날짜 표시에 요일 추가
 
 ### Changes

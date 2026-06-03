@@ -49,13 +49,14 @@ function renderDdays() {
     today.setHours(0, 0, 0, 0);
     const isMilestone = d.dday_type === 'milestone';
 
+    // 마일스톤 경과일은 카드 본문과 캘린더 버튼에서 공통으로 쓰므로 한 번만 계산
+    // 시작일 기준: 시작일 = 0일째, 100일째 = 시작일 + 100일
+    const start = isMilestone ? parseDbDate(d.start_date) : null;
+    const elapsed = isMilestone ? Math.round((today - start) / 86400000) : null;
+
     let countText, countClass, dateStr, milestoneHtml = '';
 
     if (isMilestone) {
-      // 시작일 기준: 시작일 = 0일째, 100일째 = 시작일 + 100일
-      const start = parseDbDate(d.start_date);
-      const elapsed = Math.round((today - start) / (1000 * 60 * 60 * 24));
-
       if (elapsed >= 0) {
         countText = `D + ${elapsed}`;
         countClass = elapsed === 0 ? 'today' : 'future';
@@ -128,10 +129,7 @@ function renderDdays() {
     let mainGcalTitle = d.title;
     if (isMilestone) {
       const ms = (d.milestones || []).slice().sort((a, b) => a.days - b.days);
-      const today2 = new Date(); today2.setHours(0, 0, 0, 0);
-      const start2 = parseDbDate(d.start_date);
-      const elapsed2 = Math.round((today2 - start2) / 86400000);
-      const next = ms.find(m => m.days > elapsed2);
+      const next = ms.find(m => m.days > elapsed);
       if (next) {
         mainGcalDate = next.target_date;
         mainGcalTitle = `${d.title} ${next.days}일`;
@@ -185,11 +183,6 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
-}
-
-// YYYY-MM-DD → YYYYMMDD
-function toGcalDate(dateStr) {
-  return String(dateStr).slice(0, 10).replace(/-/g, '');
 }
 
 // Date(로컬) → YYYYMMDD

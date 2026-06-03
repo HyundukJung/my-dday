@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/:token', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT title, target_date, category, share_theme FROM ddays WHERE share_token = $1 AND is_public = true',
+      'SELECT title, target_date, start_date, dday_type, category, share_theme FROM ddays WHERE share_token = $1 AND is_public = true',
       [req.params.token]
     );
 
@@ -16,9 +16,14 @@ router.get('/:token', async (req, res) => {
     }
 
     const dday = result.rows[0];
+
+    // 마일스톤 모드는 target_date가 NULL이므로 시작일을 기준 날짜로 사용한다.
+    // 시작일은 과거 → days_diff가 음수 → 프론트에서 "D + 경과일"("N일째")로 표시됨.
+    const baseDate = dday.dday_type === 'milestone' ? dday.start_date : dday.target_date;
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const target = new Date(dday.target_date);
+    const target = new Date(baseDate);
     target.setHours(0, 0, 0, 0);
     const diffTime = target.getTime() - today.getTime();
     const days_diff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -26,7 +31,7 @@ router.get('/:token', async (req, res) => {
     res.json({
       data: {
         title: dday.title,
-        target_date: dday.target_date,
+        target_date: baseDate,
         category: dday.category,
         share_theme: dday.share_theme,
         days_diff,

@@ -15,6 +15,8 @@
 
 ### 🟡 운영 주의사항
 - 비밀번호 찾기 메일 발송은 **SMTP 환경변수 미설정 시 서버 로그 fallback**. 실제 발송 원하면 Railway Variables 에 `SMTP_*` 설정 필요 (README/TRD 10장 참조)
+  - 발송 수단: **Gmail SMTP + 앱 비밀번호**(2단계 인증 필요). `SMTP_FROM` 주소는 반드시 `SMTP_USER`(Gmail 주소)와 동일해야 함 — Gmail이 From을 강제하기 때문
+  - 서버 기동 시 SMTP 미설정이면 `⚠️ [SMTP 미설정]` 경고가 로그에 출력됨 ([server.js](../backend/src/server.js) `checkMailConfig`)
 
 ---
 
