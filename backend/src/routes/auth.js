@@ -99,7 +99,12 @@ router.post(
       }
 
       const token = signToken(user);
-      res.json({ data: { token, user: { id: user.id, email: user.email } } });
+
+      // 접속 로그 기록 (fire-and-forget — 실패해도 로그인은 진행)
+      pool.query('INSERT INTO login_logs (user_id) VALUES ($1)', [user.id])
+        .catch((e) => console.error('login_logs insert error:', e.message));
+
+      res.json({ data: { token, user: { id: user.id, email: user.email, is_admin: user.is_admin } } });
     } catch (err) {
       console.error('login error:', err.message);
       res.status(500).json({ error: '서버 오류가 발생했습니다.' });
@@ -241,5 +246,19 @@ router.put(
     }
   }
 );
+
+// 현재 로그인 사용자 정보 (프론트가 관리자 여부 등을 판단)
+router.get('/me', auth, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, email, is_admin FROM users WHERE id = $1', [req.user.userId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+    }
+    res.json({ data: result.rows[0] });
+  } catch (err) {
+    console.error('me error:', err.message);
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+  }
+});
 
 module.exports = router;

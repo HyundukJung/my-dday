@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>관리자 - My D-day</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#5B6EE1">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .kpi {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .kpi-label { font-size: 0.8rem; color: var(--color-text-muted); }
+    .kpi-value { font-size: 1.8rem; font-weight: 800; color: var(--color-primary); margin-top: 4px; }
+    .chart-card {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .chart-card h2 { font-size: 1rem; margin-bottom: 12px; }
+    .chart-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 480px) { .chart-2col { grid-template-columns: 1fr; } }
+
+    .user-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .user-table th, .user-table td {
+      text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--color-border);
+    }
+    .user-table th { color: var(--color-text-muted); font-weight: 600; }
+    .badge {
+      display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 10px;
+      background: var(--color-primary); color: #fff;
+    }
+    .role-btn { font-size: 0.75rem; padding: 4px 10px; white-space: nowrap; }
+    .table-scroll { overflow-x: auto; }
+    .loading { text-align: center; color: var(--color-text-muted); padding: 32px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>관리자</h1>
+      <a href="account.html" class="btn btn-outline btn-sm">← 계정</a>
+    </div>
+
+    <div id="guard" class="loading">권한 확인 중…</div>
+
+    <div id="dashboard" style="display:none;">
+      <!-- KPI -->
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">총 회원</div><div class="kpi-value" id="kpi-users">-</div></div>
+        <div class="kpi"><div class="kpi-label">총 카드</div><div class="kpi-value" id="kpi-ddays">-</div></div>
+        <div class="kpi"><div class="kpi-label">오늘 가입</div><div class="kpi-value" id="kpi-signups">-</div></div>
+        <div class="kpi"><div class="kpi-label">오늘 접속</div><div class="kpi-value" id="kpi-logins">-</div></div>
+      </div>
+
+      <!-- 추이 차트 -->
+      <div class="chart-card">
+        <h2>최근 14일 추이</h2>
+        <canvas id="trend-chart" height="180"></canvas>
+      </div>
+
+      <!-- 분포 차트 -->
+      <div class="chart-2col">
+        <div class="chart-card">
+          <h2>카테고리 분포</h2>
+          <canvas id="category-chart" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+          <h2>카드 유형</h2>
+          <canvas id="type-chart" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- 회원 테이블 -->
+      <div class="chart-card">
+        <h2>회원 관리</h2>
+        <div class="table-scroll">
+          <table class="user-table">
+            <thead>
+              <tr><th>ID</th><th>이메일</th><th>가입일</th><th>카드</th><th>마지막 접속</th><th>권한</th></tr>
+            </thead>
+            <tbody id="user-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    requireAuth();
+
+    const CATEGORY_LABEL = { birthday: '생일', anniversary: '기념일', couple: '커플', exam: '시험' };
+    const TYPE_LABEL = { fixed: '고정형', milestone: '마일스톤' };
+    const PALETTE = ['#5B6EE1', '#E15B8A', '#5BC7E1', '#E1B45B', '#8A5BE1', '#5BE19A'];
+
+    let me = null;
+
+    // 접근 가드: 관리자만
+    api.auth.me()
+      .then((res) => {
+        me = res.data;
+        if (!me || !me.is_admin) {
+          alert('관리자 권한이 없습니다.');
+          window.location.href = 'index.html';
+          return;
+        }
+        document.getElementById('guard').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        loadAll();
+      })
+      .catch(() => { window.location.href = 'login.html'; });
+
+    function fmtDate(s) {
+      if (!s) return '-';
+      return String(s).slice(0, 10);
+    }
+
+    function last14Days() {
+      const days = [];
+      const today = new Date();
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        days.push(d.toISOString().slice(0, 10));
+      }
+      return days;
+    }
+
+    function fillSeries(labels, rows) {
+      const map = {};
+      (rows || []).forEach((r) => { map[r.day] = r.count; });
+      return labels.map((l) => map[l] || 0);
+    }
+
+    async function loadAll() {
+      try {
+        const [summary, analytics, users] = await Promise.all([
+          api.admin.summary(),
+          api.admin.analytics(),
+          api.admin.users(),
+        ]);
+        renderKpi(summary.data);
+        renderCharts(analytics.data);
+        renderUsers(users.data);
+      } catch (err) {
+        alert(err.error || '데이터를 불러오지 못했습니다.');
+      }
+    }
+
+    function renderKpi(s) {
+      document.getElementById('kpi-users').textContent = s.total_users;
+      document.getElementById('kpi-ddays').textContent = s.total_ddays;
+      document.getElementById('kpi-signups').textContent = s.today_signups;
+      document.getElementById('kpi-logins').textContent = s.today_logins;
+    }
+
+    function renderCharts(a) {
+      const labels = last14Days();
+      const shortLabels = labels.map((l) => l.slice(5)); // MM-DD
+
+      // 추이 (라인)
+      new Chart(document.getElementById('trend-chart'), {
+        type: 'line',
+        data: {
+          labels: shortLabels,
+          datasets: [
+            { label: '가입', data: fillSeries(labels, a.signups), borderColor: '#5B6EE1', backgroundColor: '#5B6EE133', tension: 0.3 },
+            { label: '접속', data: fillSeries(labels, a.logins), borderColor: '#E15B8A', backgroundColor: '#E15B8A33', tension: 0.3 },
+            { label: '카드생성', data: fillSeries(labels, a.ddays_by_day), borderColor: '#5BC7E1', backgroundColor: '#5BC7E133', tension: 0.3 },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+        },
+      });
+
+      // 카테고리 (도넛), 유형 (파이) — 데이터 없으면 안내 표시
+      drawPie('category-chart', 'doughnut', a.by_category, 'category', CATEGORY_LABEL);
+      drawPie('type-chart', 'pie', a.by_type, 'dday_type', TYPE_LABEL);
+    }
+
+    function drawPie(canvasId, type, rows, keyField, labelMap) {
+      const canvas = document.getElementById(canvasId);
+      rows = rows || [];
+      if (rows.length === 0) {
+        canvas.outerHTML = `<p class="loading" id="${canvasId}">아직 데이터가 없습니다.</p>`;
+        return;
+      }
+      new Chart(canvas, {
+        type,
+        data: {
+          labels: rows.map((r) => labelMap[r[keyField]] || r[keyField]),
+          datasets: [{ data: rows.map((r) => r.count), backgroundColor: PALETTE }],
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } },
+      });
+    }
+
+    function renderUsers(users) {
+      const tbody = document.getElementById('user-tbody');
+      tbody.innerHTML = users.map((u) => {
+        const isSelf = me && u.id === me.id;
+        const roleCell = u.is_admin
+          ? `<span class="badge">관리자</span>`
+          : '';
+        const btn = `<button class="btn btn-outline role-btn" data-id="${u.id}" data-admin="${u.is_admin}">${u.is_admin ? '해제' : '지정'}</button>`;
+        return `
+          <tr>
+            <td>${u.id}</td>
+            <td>${escapeHtml(u.email)}${isSelf ? ' <span class="text-muted">(나)</span>' : ''}</td>
+            <td>${fmtDate(u.created_at)}</td>
+            <td>${u.dday_count}</td>
+            <td>${fmtDate(u.last_login)}</td>
+            <td>${roleCell} ${btn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 권한 토글 (이벤트 위임)
+    document.getElementById('user-tbody').addEventListener('click', async (e) => {
+      const btn = e.target.closest('.role-btn');
+      if (!btn) return;
+      const id = Number(btn.dataset.id);
+      const makeAdmin = btn.dataset.admin !== 'true'; // 현재 관리자면 해제(false)
+      const action = makeAdmin ? '관리자로 지정' : '관리자 권한 해제';
+      if (!confirm(`이 회원을 ${action}하시겠습니까?`)) return;
+      btn.disabled = true;
+      try {
+        await api.admin.setRole(id, makeAdmin);
+        await loadAll();
+      } catch (err) {
+        alert(err.error || '권한 변경에 실패했습니다.');
+        btn.disabled = false;
+      }
+    });
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

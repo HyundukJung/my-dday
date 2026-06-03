@@ -2,6 +2,36 @@
 
 날짜 형식: YYYY-MM-DD (배포 기준)
 
+## [Phase 15] 2026-06-03 — 관리자 페이지
+
+### Features
+- **관리자 대시보드** (`admin.html`) — Chart.js 기반
+  - KPI: 총 회원 / 총 카드 / 오늘 가입 / 오늘 접속
+  - 차트: 14일 추이(라인), 카테고리 분포(도넛), 카드 유형(파이)
+  - 회원 관리 테이블: 이메일/가입일/카드수/마지막 접속 + 관리자 권한 토글
+- **관리자 권한 모델**
+  - `users.is_admin` 컬럼, 첫 계정(MIN id) 자동 관리자
+  - 관리자가 다른 회원에게 권한 부여/회수 (마지막 관리자는 회수 불가)
+  - `account.html`에서 관리자에게만 진입 버튼 노출
+- **접속 로그** (`login_logs`) — 로그인 시 기록(fire-and-forget), 접속량 통계용
+
+### API (신규)
+- `GET /api/auth/me` — 현재 사용자(`is_admin` 포함)
+- `GET /api/admin/summary` / `GET /api/admin/users` / `PUT /api/admin/users/:id/role` / `GET /api/admin/analytics` (모두 관리자 전용)
+
+### Security
+- `middleware/admin.js` — 매 요청 DB에서 `is_admin` 확인 (JWT 클레임 미신뢰, 권한 변경 즉시 반영)
+- 일반 사용자 admin API 접근 → 403, 마지막 관리자 권한 회수 → 400
+
+### DB
+- 마이그레이션 `004_admin.sql` (+ `000_full_schema.sql` 반영)
+- `CACHE_NAME` v6 → v7, `admin.html` pre-cache 등록
+
+### 검증
+- 로컬(Neon 연결) 백엔드 E2E + 미리보기 브라우저 렌더링 확인 (KPI/차트/권한 토글/403/마지막 관리자 보호)
+
+---
+
 ## [Infra] 2026-06-03 — 호스팅 이전: Railway → Render + Neon
 
 ### Changes

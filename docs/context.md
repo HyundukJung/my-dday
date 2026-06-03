@@ -44,6 +44,7 @@
 8. **비밀번호 찾기/변경** — 이메일 재설정 링크(30분 유효) + 로그인 후 변경
 9. **카드 메모** — 각 D-day에 1000자 이내 메모
 10. **Google Calendar 추가** — OAuth 없이 `calendar.google.com/render` 링크로 all-day 이벤트 생성
+11. **관리자 페이지** — 관리자 전용 대시보드(KPI/차트/회원 관리), 권한 부여/회수, 접속 로그 통계
 
 ### v2 예정
 - Web Push 알림 (D-day 당일 + 마일스톤 도달일)
@@ -71,7 +72,7 @@
 ## DB 스키마 요약
 
 ```
-users        id, email, password(bcrypt), created_at
+users        id, email, password(bcrypt), is_admin (Phase 15), created_at
 
 ddays        id, user_id, title, category,
              target_date (fixed 모드), start_date (milestone 모드),
@@ -83,6 +84,8 @@ milestones   id, dday_id, days, target_date,
              notified, gcal_event_id (v2용), created_at
 
 password_resets  token(PK), user_id, expires_at, used, created_at
+
+login_logs   id, user_id, created_at  (Phase 15 — 접속량 통계)
 ```
 
 ---
@@ -96,6 +99,13 @@ POST  /api/auth/login
 POST  /api/auth/forgot-password    # 1시간/5회
 POST  /api/auth/reset-password     # 토큰으로 재설정
 PUT   /api/auth/password           # 인증 필수, 비밀번호 변경
+GET   /api/auth/me                 # 현재 사용자(is_admin 포함)
+
+# 관리자 (관리자 권한 필수)
+GET   /api/admin/summary           # KPI
+GET   /api/admin/users             # 회원 목록
+PUT   /api/admin/users/:id/role    # 권한 부여/회수
+GET   /api/admin/analytics         # 시계열/분포
 
 # D-day (인증 필수)
 GET    /api/ddays
@@ -144,6 +154,7 @@ GET    /health
 | 12 | PWA (manifest, SW, 아이콘) |
 | 13 | 품질 개선 (보안, 타임존, 검증 버그) |
 | 14 | 비밀번호 찾기/변경, 카드 메모, Google Calendar 추가 |
+| 15 | 관리자 페이지 (대시보드, 권한 관리, 접속 로그) |
 
 ---
 

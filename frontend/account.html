@@ -17,6 +17,12 @@
       <a href="index.html" class="btn btn-outline btn-sm">← 목록</a>
     </div>
 
+    <div class="card" id="admin-card" style="display:none;">
+      <h2 style="font-size:1.1rem;margin-bottom:8px;">관리자</h2>
+      <p class="text-muted" style="font-size:0.85rem;margin-bottom:12px;">관리자 권한이 있는 계정입니다.</p>
+      <a href="admin.html" class="btn btn-primary" style="display:block;text-align:center;">관리자 페이지로 이동 →</a>
+    </div>
+
     <div class="card">
       <h2 style="font-size:1.1rem;margin-bottom:16px;">비밀번호 변경</h2>
       <form id="password-form">
@@ -46,6 +52,15 @@
   <script src="js/api.js"></script>
   <script>
     requireAuth();
+
+    // 관리자면 관리자 페이지 진입 카드 노출
+    api.auth.me()
+      .then((res) => {
+        if (res.data && res.data.is_admin) {
+          document.getElementById('admin-card').style.display = 'block';
+        }
+      })
+      .catch(() => {});
 
     const form = document.getElementById('password-form');
     const errorMsg = document.getElementById('error-msg');

@@ -667,3 +667,28 @@ SMTP_FROM="My D-day <no-reply@mydday.app>"
 ### 후속 Hotfix (2026-04-16)
 - `chore`: `validate: { trustProxy: false }` — Railway 환경에서 `ERR_ERL_PERMISSIVE_TRUST_PROXY` 경고 억제
 - `fix`: Service Worker HTML 요청을 **network-first** 로 변경 — Phase 14 배포 후 구버전 `index.html` 이 캐시에서 반환되던 문제 해결, `CACHE_NAME` v1→v2, 신규 HTML 3종 pre-cache 등록
+
+---
+
+## Phase 15 — 관리자 페이지 (2026-06-03)
+
+> 배경: 호스팅 이전(Railway→Render+Neon) 완료 후 추가. [MIGRATION.md](MIGRATION.md) 참조.
+
+### 15-A DB / 권한 모델
+- `004_admin.sql`: `users.is_admin` 추가, 첫 계정(MIN id) 자동 관리자, `login_logs` 테이블
+- `middleware/admin.js`: 매 요청 DB에서 `is_admin` 검증 (JWT 미신뢰)
+
+### 15-B 백엔드 API
+- `GET /api/auth/me`, `GET /api/admin/summary|users|analytics`, `PUT /api/admin/users/:id/role`
+- 로그인 시 `login_logs` 기록 (fire-and-forget)
+- 안전장치: 비관리자 403, 마지막 관리자 회수 400
+
+### 15-C 프론트엔드
+- `admin.html`: Chart.js 대시보드 (KPI + 라인/도넛/파이 + 회원 관리 테이블 + 권한 토글)
+- `account.html`: 관리자에게만 진입 버튼 노출 (`/api/auth/me`로 판별)
+- `api.js`: `auth.me()` + `admin.*` 메서드, SW `CACHE_NAME` v6→v7, `admin.html` pre-cache
+
+### 검증 (2026-06-03)
+- [x] 로컬(Neon) 백엔드 E2E: KPI/목록/analytics, 권한 부여·회수, 비관리자 403, 마지막 관리자 보호 400
+- [x] 미리보기 브라우저 렌더링: 가드 통과, Chart.js 로드, 4종 차트 + 회원 테이블 정상
+- [ ] 프로덕션(Render+Vercel) E2E — 배포 후 확인

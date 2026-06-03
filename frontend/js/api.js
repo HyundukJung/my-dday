@@ -64,6 +64,13 @@ const api = {
     resetPassword: (token, password) => request('POST', '/api/auth/reset-password', { token, password }),
     changePassword: (currentPassword, newPassword) =>
       request('PUT', '/api/auth/password', { currentPassword, newPassword }),
+    me: () => request('GET', '/api/auth/me'),
+  },
+  admin: {
+    summary: () => request('GET', '/api/admin/summary'),
+    users: () => request('GET', '/api/admin/users'),
+    setRole: (id, is_admin) => request('PUT', `/api/admin/users/${id}/role`, { is_admin }),
+    analytics: () => request('GET', '/api/admin/analytics'),
   },
   ddays: {
     list: () => request('GET', '/api/ddays'),

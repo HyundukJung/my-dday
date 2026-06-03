@@ -78,10 +78,10 @@ Phase/작업을 "완료"로 표시하려면 다음을 **모두** 만족해야 �
 
 - **제품:** My D-day — 날짜 카운트다운 + 마일스톤 + 테마 공유 PWA
 - **스택:** Node.js 24 + Express 5 + PostgreSQL / Vanilla JS + PWA
-- **배포:** Vercel (프론트) + Railway (백엔드+DB)
-- **주소:** https://my-dday.vercel.app
+- **배포:** Vercel (프론트) + **Render (백엔드)** + **Neon (Postgres)** — *Railway에서 이전, 2026-06-03*
+- **주소:** https://my-dday.vercel.app (백엔드: https://my-dday-backend.onrender.com)
 - **리포:** https://github.com/HyundukJung/my-dday
-- **현재 Phase:** 14 완료 (비밀번호 찾기/변경, 메모, GCal 링크), v2 (Web Push / GCal OAuth 자동 동기화) 대기 중
+- **현재 Phase:** 15 완료 (관리자 페이지: 대시보드/권한관리/접속로그), v2 (Web Push / GCal OAuth 자동 동기화) 대기 중
 
 ## 🔧 자주 쓰는 명령
 
@@ -102,7 +102,7 @@ pool.query(fs.readFileSync('./src/migrations/NNN_name.sql', 'utf8'))
 
 # 배포 (자동)
 git push origin main
-# → Railway + Vercel 자동 배포 (1~2분)
+# → Render(백엔드) + Vercel(프론트) 자동 배포 (1~3분, Render는 콜드스타트 ~50초)
 
 # 배포 검증
 curl https://my-dday-production.up.railway.app/health

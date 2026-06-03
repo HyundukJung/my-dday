@@ -57,6 +57,7 @@ app.get('/health', async (req, res) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/ddays', require('./routes/ddays'));
 app.use('/api/share', require('./routes/share'));
+app.use('/api/admin', require('./routes/admin'));
 
 // --- 에러 핸들러 ---
 app.use((err, req, res, next) => {

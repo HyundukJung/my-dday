@@ -99,6 +99,7 @@ CREATE TABLE users (
   id         SERIAL PRIMARY KEY,
   email      VARCHAR(255) UNIQUE NOT NULL,
   password   VARCHAR(255) NOT NULL,   -- bcrypt(cost 12) 해시
+  is_admin   BOOLEAN DEFAULT FALSE,   -- Phase 15 (첫 계정 자동 관리자)
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -142,6 +143,15 @@ CREATE TABLE password_resets (
 );
 CREATE INDEX idx_password_resets_user_id ON password_resets(user_id);
 CREATE INDEX idx_password_resets_expires_at ON password_resets(expires_at);
+
+-- login_logs (Phase 15 신규) — 접속량 통계
+CREATE TABLE login_logs (
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW()       -- 로그인 성공 시 기록
+);
+CREATE INDEX idx_login_logs_created_at ON login_logs(created_at);
+CREATE INDEX idx_login_logs_user_id ON login_logs(user_id);
 ```
 
 ---
@@ -162,6 +172,17 @@ CREATE INDEX idx_password_resets_expires_at ON password_resets(expires_at);
 | POST | `/api/auth/forgot-password` | 비밀번호 재설정 토큰 발급 + 메일 전송 (rate limit: 1시간/5회) |
 | POST | `/api/auth/reset-password`  | `{ token, password }` — 토큰 검증 후 해시 갱신 |
 | PUT  | `/api/auth/password` | 로그인 상태에서 `{ currentPassword, newPassword }` |
+| GET  | `/api/auth/me` | 현재 로그인 사용자 `{ id, email, is_admin }` (인증 필수) |
+
+### 관리자 (인증 + 관리자 권한 필수, Phase 15)
+> `middleware/admin.js`가 매 요청 DB에서 `is_admin`을 확인 (JWT 클레임 미신뢰). 비관리자 → 403.
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/admin/summary` | KPI (총 회원/카드, 오늘 가입/접속, 관리자 수) |
+| GET | `/api/admin/users` | 회원 목록 (이메일, 가입일, 카드수, 마지막 접속, is_admin) |
+| PUT | `/api/admin/users/:id/role` | `{ is_admin }` 권한 부여/회수 (마지막 관리자 회수 → 400) |
+| GET | `/api/admin/analytics` | 최근 14일 가입/접속/카드 시계열 + 카테고리/유형 분포 |
 
 ### D-day (인증 필수, rate limit: 15분/300회)
 | Method | Path | 설명 |

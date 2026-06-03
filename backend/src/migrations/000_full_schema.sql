@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   id         SERIAL PRIMARY KEY,
   email      VARCHAR(255) UNIQUE NOT NULL,
   password   VARCHAR(255) NOT NULL,
+  is_admin   BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -55,3 +56,13 @@ CREATE TABLE IF NOT EXISTS password_resets (
 
 CREATE INDEX IF NOT EXISTS idx_password_resets_user_id ON password_resets(user_id);
 CREATE INDEX IF NOT EXISTS idx_password_resets_expires_at ON password_resets(expires_at);
+
+-- login_logs — 접속(로그인) 로그 (접속량 통계용, Phase 15)
+CREATE TABLE IF NOT EXISTS login_logs (
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_login_logs_created_at ON login_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_login_logs_user_id ON login_logs(user_id);
