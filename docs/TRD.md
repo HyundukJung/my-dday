@@ -116,6 +116,8 @@ CREATE TABLE ddays (
   share_token VARCHAR(21) UNIQUE,
   share_theme VARCHAR(50),
   memo        TEXT,                         -- Phase 14 (nullable, 앱 레벨 1000자 제한)
+  created_tz  VARCHAR(64),                  -- Phase 16: 등록 시점 브라우저 타임존(IANA), 생성 시에만 기록
+  display_tz  VARCHAR(64),                  -- Phase 16: 사용자가 추가로 보고 싶은 세계시(IANA), nullable
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -188,7 +190,7 @@ CREATE INDEX idx_login_logs_user_id ON login_logs(user_id);
 | Method | Path | 설명 |
 |--------|------|------|
 | GET    | `/api/ddays` | 본인 D-day 목록 + 각 마일스톤 배열 포함 |
-| POST   | `/api/ddays` | 생성 (dday_type에 따라 target_date 또는 start_date+milestone_days) |
+| POST   | `/api/ddays` | 생성 (dday_type에 따라 target_date 또는 start_date+milestone_days, 선택 `created_tz`/`display_tz`) |
 | PUT    | `/api/ddays/:id` | 수정 (타입 변경 포함, 마일스톤 재생성) |
 | DELETE | `/api/ddays/:id` | 삭제 (마일스톤 CASCADE) |
 | POST   | `/api/ddays/:id/share` | 공유 링크 생성 (share_theme 지정) |
@@ -234,6 +236,24 @@ Authorization: Bearer <token>
   }
 }
 ```
+
+### 타임존 포함 생성 (Phase 16)
+```http
+POST /api/ddays
+Authorization: Bearer <token>
+
+{
+  "title": "현지 시험일",
+  "category": "exam",
+  "dday_type": "fixed",
+  "target_date": "2026-02-12",
+  "created_tz": "Asia/Seoul",          // 등록 시점 브라우저 타임존 (생성 시에만 기록)
+  "display_tz": "America/New_York"      // 추가로 보고 싶은 세계시 (nullable, PUT으로만 변경)
+}
+```
+- `created_tz`/`display_tz`: 선택 필드, `optional({ nullable: true })` + `isString` + `max 64` 검증
+- **PUT은 `display_tz`만 갱신** — `created_tz`(등록 기준 시점)는 수정해도 보존
+- 카드 표시: 날짜를 `created_tz`의 그날 00:00 순간으로 잡아 등록지/UTC/`display_tz`로 환산 (프론트 `timezones.js`, DST 반영)
 
 ### 공유 조회 (비로그인)
 ```http

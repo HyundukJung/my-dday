@@ -400,6 +400,25 @@ body {
   flex-shrink: 0;
 }
 
+/* 기준 시점(타임존) 표시 */
+.dday-tz {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.dday-tz-label {
+  font-size: 0.68rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1px 7px;
+}
+
 /* 메모 */
 .dday-memo {
   margin-top: 10px;

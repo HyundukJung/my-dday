@@ -12,7 +12,7 @@
   - DB: Neon Postgres (Railway에서 이전)
   - ⚠️ Render 무료 인스턴스는 15분 무요청 시 슬립 → 첫 접속 ~50초 콜드 스타트
 - iPhone/Android에 **홈 화면 설치 가능 (PWA)**
-- Phase 0~14 완료 (비밀번호 찾기/변경, 메모, Google Calendar 링크 포함)
+- Phase 0~16 완료 (비밀번호 찾기/변경, 메모, GCal 링크, 관리자 페이지, 카드 타임존 표시 포함)
 - SW는 HTML network-first — 새 배포 즉시 반영
 
 ### 🟡 운영 주의사항
@@ -46,6 +46,7 @@
 10. **Google Calendar 추가** — OAuth 없이 `calendar.google.com/render` 링크로 all-day 이벤트 생성
     - 마일스톤은 체크박스로 여러 개 선택 → 1개는 GCal 링크, 여러 개는 .ics 파일로 일괄 추가
 11. **관리자 페이지** — 관리자 전용 대시보드(KPI/차트/회원 관리), 권한 부여/회수, 접속 로그 통계
+12. **카드 기준 시점(타임존)** — 등록 지역 시간 / UTC / 선택한 세계시를 카드에 함께 표시 (DST 자동)
 
 ### v2 예정
 - Web Push 알림 (D-day 당일 + 마일스톤 도달일)
@@ -79,7 +80,8 @@ ddays        id, user_id, title, category,
              target_date (fixed 모드), start_date (milestone 모드),
              dday_type ('fixed'|'milestone'),
              is_public, share_token, share_theme,
-             memo (Phase 14), created_at
+             memo (Phase 14),
+             created_tz / display_tz (Phase 16 — 타임존), created_at
 
 milestones   id, dday_id, days, target_date,
              notified, gcal_event_id (v2용), created_at

@@ -25,6 +25,18 @@ function updateTypeFields() {
 }
 typeRadios.forEach(r => r.addEventListener('change', updateTypeFields));
 
+// 세계시 드롭다운 채우기 (#4)
+(function fillTzOptions() {
+  const sel = document.getElementById('display_tz');
+  if (!sel || typeof WORLD_TIMEZONES === 'undefined') return;
+  WORLD_TIMEZONES.forEach((t) => {
+    const opt = document.createElement('option');
+    opt.value = t.tz;
+    opt.textContent = `${t.flag} ${t.label}`;
+    sel.appendChild(opt);
+  });
+})();
+
 // 수정 모드
 const params = new URLSearchParams(window.location.search);
 const editId = params.get('id');
@@ -54,6 +66,7 @@ async function loadDday() {
     document.getElementById('title').value = dday.title;
     document.getElementById('category').value = dday.category;
     document.getElementById('memo').value = dday.memo || '';
+    document.getElementById('display_tz').value = dday.display_tz || '';
 
     // 유형 설정
     const type = dday.dday_type || 'fixed';
@@ -108,6 +121,9 @@ form.addEventListener('submit', async (e) => {
   if (memo.length > 1000) return showError('메모는 1000자 이하여야 합니다.');
 
   const payload = { title, category, dday_type, memo: memo || null };
+  payload.display_tz = document.getElementById('display_tz').value || null;
+  // 등록 시점의 타임존은 새로 만들 때만 기록 (기준 시점)
+  if (!isEdit) payload.created_tz = browserTz();
 
   if (dday_type === 'milestone') {
     const start_date = document.getElementById('start_date').value;

@@ -129,6 +129,20 @@ function renderDdays() {
       ? `<div class="dday-memo">${escapeHtml(d.memo).replace(/\n/g, '<br>')}</div>`
       : '';
 
+    // 기준 시점: D-day의 날짜(고정형=목표일, 마일스톤=시작일)를 "등록 지역의 그날 0시"로 잡고,
+    // 그 같은 순간이 등록 지역 / UTC / 선택한 세계시로는 언제인지 표시
+    let tzHtml = '';
+    const anchorDate = isMilestone ? d.start_date : d.target_date;
+    if (anchorDate && typeof zonedDateToInstant === 'function') {
+      const anchorTz = d.created_tz || browserTz();
+      const instant = zonedDateToInstant(anchorDate, anchorTz);
+      const rows = [];
+      rows.push(`${tzFlag(anchorTz)} ${tzShortLabel(anchorTz)} ${formatInTz(instant, anchorTz)}`);
+      rows.push(`🌐 UTC ${formatInTz(instant, 'UTC')}`);
+      if (d.display_tz) rows.push(`${tzFlag(d.display_tz)} ${tzShortLabel(d.display_tz)} ${formatInTz(instant, d.display_tz)}`);
+      tzHtml = `<div class="dday-tz"><span class="dday-tz-label">기준 시점</span>${rows.map(r => `<span>${r}</span>`).join('')}</div>`;
+    }
+
     // 카드 메인 GCal 버튼: 고정형만 (마일스톤은 목록에서 선택해 일괄 추가)
     const gcalMainBtn = !isMilestone
       ? `<button class="btn btn-outline btn-sm gcal-btn" data-title="${escapeHtml(d.title)}" data-date="${d.target_date}" data-memo="${escapeHtml(d.memo || '')}">📅 캘린더</button>`
@@ -142,6 +156,7 @@ function renderDdays() {
         </div>
         <div class="dday-count ${countClass}">${countText === 'D-DAY' ? '&#127881; ' : ''}${countText}</div>
         <div class="dday-date">${dateStr}</div>
+        ${tzHtml}
         ${memoHtml}
         ${milestoneHtml}
         <div class="dday-actions">

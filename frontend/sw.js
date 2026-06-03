@@ -2,7 +2,7 @@
 // 전략: HTML은 network-first (새 배포 즉시 반영), 기타 정적 자원은 cache-first.
 //       API는 동일 출처가 아니므로 간섭하지 않음.
 
-const CACHE_NAME = 'my-dday-v10';
+const CACHE_NAME = 'my-dday-v11';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -18,6 +18,7 @@ const STATIC_ASSETS = [
   '/css/main.css',
   '/css/themes.css',
   '/js/api.js',
+  '/js/timezones.js',
   '/js/auth.js',
   '/js/ddays.js',
   '/js/form.js',

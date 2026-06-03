@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS ddays (
   share_token VARCHAR(21) UNIQUE,
   share_theme VARCHAR(50),
   memo        TEXT,
+  created_tz  VARCHAR(64),                     -- 등록 시점 타임존 (Phase 16)
+  display_tz  VARCHAR(64),                     -- 사용자가 선택한 세계시 (Phase 16)
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 

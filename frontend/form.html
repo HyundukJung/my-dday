@@ -92,6 +92,14 @@
           <small class="help-text">최대 1000자</small>
         </div>
 
+        <div class="input-group">
+          <label for="display_tz">표시할 세계시 (선택)</label>
+          <select id="display_tz">
+            <option value="">표시 안 함</option>
+          </select>
+          <small class="help-text">카드에 등록 지역 시간·UTC와 함께 선택한 세계시도 보여줍니다</small>
+        </div>
+
         <p id="error-msg" class="error-msg"></p>
 
         <button type="submit" class="btn btn-primary mt-12" id="submit-btn">저장</button>
@@ -100,6 +108,7 @@
   </div>
 
   <script src="js/api.js"></script>
+  <script src="js/timezones.js"></script>
   <script src="js/form.js"></script>
 </body>
 </html>

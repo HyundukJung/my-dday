@@ -2,6 +2,36 @@
 
 날짜 형식: YYYY-MM-DD (배포 기준)
 
+## [Feat] 2026-06-03 — Phase 16: 카드 기준 시점(타임존) 표시
+
+### Features
+- **카드에 기준 시점(타임존) 표시** (`frontend/js/ddays.js`, `frontend/js/timezones.js`)
+  - 카드 날짜(고정형=목표일, 마일스톤=시작일)를 "등록 지역의 그날 0시" 순간으로 잡아
+    등록 지역 시간 / UTC / (선택 시) 사용자가 고른 세계시로 환산해 한 줄로 표시
+  - 서머타임(DST)·지역별 오프셋은 `Intl.DateTimeFormat` 기반으로 자동 처리
+- **세계시 선택 드롭다운** (`frontend/form.html`, `frontend/js/form.js`)
+  - 주요 16개 세계시 목록(`WORLD_TIMEZONES`) 중 선택, "표시 안 함" 기본값
+  - 카드 생성 시 브라우저 타임존을 `created_tz`로 자동 기록 (등록 기준 시점)
+
+### API
+- `POST/PUT /api/ddays`에 선택 필드 `created_tz`, `display_tz` 추가 (`isString`, max 64)
+  - **PUT은 `display_tz`만 갱신** — `created_tz`(등록 기준)는 수정해도 보존
+
+### DB
+- 마이그레이션 `005_timezone.sql` — `ddays.created_tz`, `ddays.display_tz` (VARCHAR(64), nullable)
+  - `000_full_schema.sql`에도 반영
+- `CACHE_NAME` v10 → v11, `js/timezones.js` pre-cache 등록
+
+### 검증 (2026-06-03)
+- [x] 타임존 변환 로직 단위 검증: 자정→UTC 순간 변환, UTC/뉴욕 환산, DST(미 동부 여름 EDT) 정확
+- [x] 로컬(Neon) API E2E: created_tz/display_tz 저장·조회, PUT 시 created_tz 보존 확인
+- [ ] 프로덕션(Render+Vercel) E2E — 배포 후 확인
+
+### 비고
+- 메인 카드 목록 전용 표시 (공유 페이지 `share.html`은 미적용)
+
+---
+
 ## [Feat/UX] 2026-06-03 — 마일스톤 다중 선택 캘린더 추가 + 선택 UI 개선
 
 ### Features

@@ -44,6 +44,8 @@ const ddayValidation = [
   body('start_date').optional({ nullable: true }).isDate().withMessage('올바른 시작일 형식이 아닙니다. (YYYY-MM-DD)'),
   body('milestone_days').optional().isArray().withMessage('milestone_days는 배열이어야 합니다.'),
   body('memo').optional({ nullable: true }).isLength({ max: 1000 }).withMessage('메모는 1000자 이하여야 합니다.'),
+  body('created_tz').optional({ nullable: true }).isString().isLength({ max: 64 }),
+  body('display_tz').optional({ nullable: true }).isString().isLength({ max: 64 }),
 ];
 
 // 타입별 필수 필드 검증 (POST/PUT 공통)
@@ -97,7 +99,7 @@ router.get('/', async (req, res) => {
 router.post('/', ddayValidation, validate, async (req, res) => {
   const client = await pool.connect();
   try {
-    const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days, memo } = req.body;
+    const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days, memo, created_tz, display_tz } = req.body;
 
     const typeError = validateTypeFields(req.body);
     if (typeError) return res.status(400).json({ error: typeError });
@@ -105,8 +107,8 @@ router.post('/', ddayValidation, validate, async (req, res) => {
     await client.query('BEGIN');
 
     const ddayResult = await client.query(
-      `INSERT INTO ddays (user_id, title, category, target_date, start_date, dday_type, memo)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      `INSERT INTO ddays (user_id, title, category, target_date, start_date, dday_type, memo, created_tz, display_tz)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
       [
         req.user.userId,
         title,
@@ -115,6 +117,8 @@ router.post('/', ddayValidation, validate, async (req, res) => {
         dday_type === 'milestone' ? start_date : null,
         dday_type,
         memo || null,
+        created_tz || null,
+        display_tz || null,
       ]
     );
     const dday = ddayResult.rows[0];
@@ -144,17 +148,18 @@ router.post('/', ddayValidation, validate, async (req, res) => {
 router.put('/:id', ddayValidation, validate, async (req, res) => {
   const client = await pool.connect();
   try {
-    const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days, memo } = req.body;
+    const { title, category, dday_type = 'fixed', target_date, start_date, milestone_days, memo, display_tz } = req.body;
 
     const typeError = validateTypeFields(req.body);
     if (typeError) return res.status(400).json({ error: typeError });
 
     await client.query('BEGIN');
 
+    // created_tz(등록 시점)는 수정해도 그대로 유지, display_tz(보고싶은 세계시)만 갱신
     const result = await client.query(
       `UPDATE ddays
-       SET title = $1, category = $2, target_date = $3, start_date = $4, dday_type = $5, memo = $6
-       WHERE id = $7 AND user_id = $8 RETURNING *`,
+       SET title = $1, category = $2, target_date = $3, start_date = $4, dday_type = $5, memo = $6, display_tz = $7
+       WHERE id = $8 AND user_id = $9 RETURNING *`,
       [
         title,
         category,
@@ -162,6 +167,7 @@ router.put('/:id', ddayValidation, validate, async (req, res) => {
         dday_type === 'milestone' ? start_date : null,
         dday_type,
         memo || null,
+        display_tz || null,
         req.params.id,
         req.user.userId,
       ]

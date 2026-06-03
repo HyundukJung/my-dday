@@ -614,6 +614,8 @@ CREATE TABLE push_subscriptions (
 | 12 | PWA (홈 화면 설치, SW 오프라인) | ✅ 완료 |
 | 13 | 품질 개선 (보안/타임존/검증) | ✅ 완료 |
 | 14 | 계정(비밀번호) + 메모 + GCal | ✅ 완료 (2026-04-16 검증 완료) |
+| 15 | 관리자 페이지 | ✅ 완료 (로컬/미리보기 검증, 프로덕션 E2E 대기) |
+| 16 | 카드 기준 시점(타임존) 표시 | ✅ 완료 (로컬 검증, 프로덕션 E2E 대기) |
 
 ---
 
@@ -691,4 +693,26 @@ SMTP_FROM="My D-day <no-reply@mydday.app>"
 ### 검증 (2026-06-03)
 - [x] 로컬(Neon) 백엔드 E2E: KPI/목록/analytics, 권한 부여·회수, 비관리자 403, 마지막 관리자 보호 400
 - [x] 미리보기 브라우저 렌더링: 가드 통과, Chart.js 로드, 4종 차트 + 회원 테이블 정상
+- [ ] 프로덕션(Render+Vercel) E2E — 배포 후 확인
+
+---
+
+## Phase 16 — 카드 기준 시점(타임존) 표시 (2026-06-03)
+
+### 목표
+카드의 날짜가 "어느 지역 기준의 그날인지"를 분명히 보여준다. 등록 지역 시간 / UTC / 사용자가 고른 세계시를 함께 표시해, 해외 일정·국제 기념일의 시차 혼동을 없앤다.
+
+### 16-A DB / 백엔드
+- `005_timezone.sql`: `ddays.created_tz`, `ddays.display_tz` (VARCHAR(64), nullable) + `000_full_schema.sql` 반영
+- `routes/ddays.js`: POST/PUT validation에 두 필드 추가, **POST에서만 `created_tz` 기록 / PUT은 `display_tz`만 갱신**(등록 기준 시점 보존)
+
+### 16-B 프론트엔드
+- `js/timezones.js`(신규): `WORLD_TIMEZONES`(16종) + `zonedDateToInstant`/`formatInTz`/`tzFlag`/`tzShortLabel`/`browserTz` 유틸 (DST 자동 처리)
+- `form.html`/`form.js`: 세계시 드롭다운("표시 안 함" 기본), 생성 시 `browserTz()`를 `created_tz`로 자동 기록
+- `index.html`/`ddays.js`/`main.css`: 카드에 "기준 시점" 칩 + 등록지/UTC/세계시 행 렌더
+- `sw.js`: `CACHE_NAME` v10→v11, `js/timezones.js` pre-cache
+
+### 검증 (2026-06-03)
+- [x] 타임존 변환 단위 검증: 자정→UTC 순간, UTC/뉴욕 환산, DST(미 동부 여름 EDT) 정확
+- [x] 로컬(Neon) API E2E: 생성·조회 시 두 필드 저장, PUT 시 `created_tz` 보존 확인
 - [ ] 프로덕션(Render+Vercel) E2E — 배포 후 확인
