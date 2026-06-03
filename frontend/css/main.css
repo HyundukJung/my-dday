@@ -258,10 +258,35 @@ body {
 }
 
 .milestone-presets input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--color-primary);
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 6px;
+  background: #fff;
+  position: relative;
   flex-shrink: 0;
+  cursor: pointer;
+}
+
+.milestone-presets input[type="checkbox"]:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* 선택 시 흰색 체크(✓) 표시 */
+.milestone-presets input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .help-text {
@@ -338,10 +363,35 @@ body {
 }
 
 .ms-pick {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--color-primary);
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 5px;
+  background: #fff;
+  position: relative;
   flex-shrink: 0;
+  cursor: pointer;
+}
+
+.ms-pick:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* 선택 시 흰색 체크(✓) 표시 */
+.ms-pick:checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .ms-pick-spacer {
